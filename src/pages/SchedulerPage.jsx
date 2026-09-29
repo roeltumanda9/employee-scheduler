@@ -483,9 +483,9 @@ const [dept, setDept] = useState(() => {
     }
 
     @page {
-      size: 13in 8.5in;
-      margin: 6mm 5mm;
-    }
+  size: landscape;
+  margin: 6mm 5mm;
+} 
     @media print {
       html, body { background: #fff; }
       .page { padding: 0; }
