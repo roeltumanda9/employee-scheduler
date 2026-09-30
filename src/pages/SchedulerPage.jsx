@@ -22,14 +22,54 @@ export default function SchedulerPage({ role }) {
   const canEdit = role === "super_admin" || role === "admin";
 
   const today = new Date();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth() + 1; // 1-12
+
+  // --- 3-month window: previous, current, next ---
+  function monthOffset(delta) {
+    let m = todayMonth + delta;
+    let y = todayYear;
+    if (m < 1) { m = 12; y -= 1; }
+    if (m > 12) { m = 1; y += 1; }
+    return { year: y, month: m };
+  }
+
+  const PREV = monthOffset(-1);
+  const NEXT = monthOffset(1);
+
+  function isAllowed(y, m) {
+    const key = y * 100 + m;
+    return (
+      key >= PREV.year * 100 + PREV.month &&
+      key <= NEXT.year * 100 + NEXT.month
+    );
+  }
+
+  // --- State ---
   const [month, setMonth] = useState(() => {
-    const v = parseInt(localStorage.getItem("hmc_sched_month"), 10);
-    return v >= 1 && v <= 12 ? v : today.getMonth() + 1;
+    const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
+    const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
+    if (
+      savedM >= 1 && savedM <= 12 &&
+      savedY >= 2000 && savedY <= 2100 &&
+      isAllowed(savedY, savedM)
+    ) {
+      return savedM;
+    }
+    return todayMonth;
   });
 
   const [year, setYear] = useState(() => {
-    const v = parseInt(localStorage.getItem("hmc_sched_year"), 10);
-    return v >= 2000 && v <= 2100 ? v : today.getFullYear();
+    const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
+    const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
+    if (
+      savedM >= 1 && savedM <= 12 &&
+      savedY >= 2000 && savedY <= 2100 &&
+      isAllowed(savedY, savedM)
+    ) {
+      return savedY;
+    }
+    return todayYear;
   });
 
   const [half, setHalf] = useState(() => {
@@ -183,8 +223,19 @@ export default function SchedulerPage({ role }) {
     let y = year;
     if (m < 1) { m = 12; y -= 1; }
     if (m > 12) { m = 1; y += 1; }
+    if (!isAllowed(y, m)) return;
     setMonth(m);
     setYear(y);
+  }
+
+  function canGoPrev() {
+    const current = year * 100 + month;
+    return current > PREV.year * 100 + PREV.month;
+  }
+
+  function canGoNext() {
+    const current = year * 100 + month;
+    return current < NEXT.year * 100 + NEXT.month;
   }
 
   /* ---------------- PRINT ---------------- */
@@ -631,6 +682,15 @@ export default function SchedulerPage({ role }) {
   const filledCells = stats.AM + stats.PM + stats.D + stats.OFF;
   const emptyCells = totalCells - filledCells;
 
+  // Is the currently viewed month the current calendar month?
+  const isCurrentMonth = month === todayMonth && year === todayYear;
+  const isPrevMonth =
+    !isCurrentMonth &&
+    (year * 100 + month) < (todayYear * 100 + todayMonth);
+  const isNextMonth =
+    !isCurrentMonth &&
+    (year * 100 + month) > (todayYear * 100 + todayMonth);
+
   return (
     <div className="space-y-5">
       <div className="sticky top-0 z-30 -mx-4 md:-mx-6 px-4 md:px-6 pt-2 pb-3 bg-slate-100/80 backdrop-blur border-b border-slate-200">
@@ -638,16 +698,21 @@ export default function SchedulerPage({ role }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => changeMonth(-1)}
-              className="w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition"
-              title="Previous month"
+              disabled={!canGoPrev()}
+              className="w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              title={canGoPrev() ? "Previous month" : "No earlier months available"}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
-            <div className="min-w-[140px] text-center">
+            <div className="min-w-[160px] text-center">
               <div className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
-                Schedule
+                {isCurrentMonth
+                  ? "Current Month"
+                  : isPrevMonth
+                  ? "Previous Month"
+                  : "Next Month"}
               </div>
               <div className="text-base font-bold text-slate-800">
                 {months[month - 1]} {year}
@@ -655,8 +720,9 @@ export default function SchedulerPage({ role }) {
             </div>
             <button
               onClick={() => changeMonth(1)}
-              className="w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition"
-              title="Next month"
+              disabled={!canGoNext()}
+              className="w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              title={canGoNext() ? "Next month" : "No later months available"}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6" />
