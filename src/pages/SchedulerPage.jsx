@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabase";
 import { getDaysInMonth } from "../lib/dates";
 import { DEPARTMENTS } from "../lib/departments";
 import ScheduleGrid from "../components/ScheduleGrid";
-import { STATUS_MAP, STATUSES_BY_DEPARTMENT } from "../lib/statuses";
+import { STATUS_MAP, STATUSES_BY_DEPARTMENT, resolveStatus } from "../lib/statuses";
 
 
 const DEPT_BANNERS = {
@@ -335,7 +335,7 @@ const legendCodes = isAllDepts
     })();
 
 const legendItems = legendCodes
-  .map((code) => STATUS_MAP[code])
+  .map((code) => resolveStatus(STATUS_MAP[code], dept))
   .filter(Boolean);
 
     const html = `

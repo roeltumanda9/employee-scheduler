@@ -6,11 +6,18 @@
 export const STATUSES = [
   // DUTY — varies per department, but code stays the same
   {
-    code: "DUTY",
-    label: "Duty",
-    time: "10:00 AM – 7:00 PM",
-    classes: "bg-sky-500 text-white",
+  code: "DUTY",
+  label: "Duty",
+  time: "10:00 AM – 7:00 PM",   // default (Amysthetic)
+  timeByDepartment: {
+    "Amysthetic":     "10:00 AM – 7:00 PM",
+    "Wellness":       "8:00 AM – 5:00 PM",
+    "Juhanju":        "9:00 AM – 6:00 PM",
+    "HMC":            "8:00 AM – 5:00 PM",
+    "HMC Laboratory": "8:00 AM – 5:00 PM",
   },
+  classes: "bg-sky-500 text-white",
+},
 
   // H Hotel
   { code: "NS",  label: "Night Shift",         time: "6:00 PM – 3:00 AM", classes: "bg-indigo-500 text-white" },
@@ -51,4 +58,21 @@ export const STATUSES_BY_DEPARTMENT = {
 export function statusesForDepartment(department) {
   const codes = STATUSES_BY_DEPARTMENT[department] || ["OFF"];
   return codes.map((code) => STATUS_MAP[code]).filter(Boolean);
+}
+
+// Returns the status object with a `time` that's correct for that department
+export function resolveStatus(status, department) {
+  if (!status) return status;
+  if (status.timeByDepartment && status.timeByDepartment[department]) {
+    return { ...status, time: status.timeByDepartment[department] };
+  }
+  return status;
+}
+
+// Get the list of allowed statuses for a department, with times resolved
+export function statusesForDepartmentResolved(department) {
+  const codes = STATUSES_BY_DEPARTMENT[department] || ["OFF"];
+  return codes
+    .map((code) => resolveStatus(STATUS_MAP[code], department))
+    .filter(Boolean);
 }

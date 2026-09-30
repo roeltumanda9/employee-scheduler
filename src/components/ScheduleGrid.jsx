@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { STATUSES, STATUS_MAP, statusesForDepartment } from "../lib/statuses";
+import { STATUSES, STATUS_MAP, statusesForDepartmentResolved } from "../lib/statuses";
 
 // Fixed large sizes for readability
 const SIZES = {
@@ -189,7 +189,7 @@ const total = present;
   height={z.cellH}
   textClass={z.cellText}
   readOnly={readOnly}
-  statuses={statusesForDepartment(emp.department)}
+  statuses={statusesForDepartmentResolved(emp.department)}
   onChange={(newStatus) =>
     onSetStatus(emp.id, d.iso, newStatus)
   }
