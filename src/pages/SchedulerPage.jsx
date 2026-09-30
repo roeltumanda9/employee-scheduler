@@ -1018,14 +1018,6 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
         <StatCard label="Employees" value={visibleEmployees.length} />
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 px-1">
-  <span className="font-medium text-slate-500">
-    Shifts shown in each cell depend on the employee's department.
-  </span>
-  <LegendChip color="bg-slate-300" label="OFF" />
-  <LegendChip color="bg-white ring-1 ring-slate-300" label="Unassigned" />
-</div>
-
       {loading ? (
         <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-12 text-center">
           <div className="inline-block w-6 h-6 border-2 border-slate-300 border-t-green-600 rounded-full animate-spin" />
