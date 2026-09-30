@@ -3,7 +3,7 @@ export const DEPARTMENTS = [
   "H Hotel",
   "JA Grocery / Pharmacy",
   "Wellness",
-  "johanju",
+  "Johanju",
   "HMC",
   "HMC Laboratory",
   "Hofitea",
