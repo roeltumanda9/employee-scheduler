@@ -3,7 +3,6 @@ import { supabase } from "../lib/supabase";
 import { DEPARTMENTS } from "../lib/departments";
 import EmployeeForm from "../components/EmployeeForm";
 
-// Neutral badge in the table (uniform gray, as you requested)
 const DEPT_BADGE = "bg-slate-100 text-slate-700 ring-slate-200";
 
 function middleInitial(middle_name) {
@@ -26,7 +25,9 @@ function displayName(e) {
   return (e.name || "").toUpperCase();
 }
 
-export default function EmployeesPage() {
+export default function EmployeesPage({ role }) {
+  const canManage = role === "super_admin";
+
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
@@ -42,7 +43,6 @@ export default function EmployeesPage() {
     if (error) {
       alert(error.message);
     } else {
-      // Sort numerically by employee number
       const sorted = [...data].sort((a, b) => {
         const na = parseInt(a.number, 10);
         const nb = parseInt(b.number, 10);
@@ -111,18 +111,20 @@ export default function EmployeesPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <EmployeeForm
-        open={formOpen}
-        editing={editing}
-        onDone={() => {
-          closeForm();
-          loadEmployees();
-        }}
-        onCancel={closeForm}
-      />
+      {canManage && (
+        <EmployeeForm
+          open={formOpen}
+          editing={editing}
+          onDone={() => {
+            closeForm();
+            loadEmployees();
+          }}
+          onCancel={closeForm}
+        />
+      )}
 
-      <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200">
-        {/* ------- Header ------- */}
+      <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 overflow-hidden">
+        {/* Header */}
         <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-slate-800">
@@ -154,21 +156,23 @@ export default function EmployeesPage() {
               />
             </div>
 
-            {/* Add button */}
-            <button
-              onClick={openAdd}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 active:scale-95 shadow-sm shadow-green-200 transition"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Add employee
-            </button>
+            {/* Add button (only for super admin) */}
+            {canManage && (
+              <button
+                onClick={openAdd}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 active:scale-95 shadow-sm shadow-green-200 transition"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Add employee
+              </button>
+            )}
           </div>
         </div>
 
-        {/* ------- Filter row ------- */}
+        {/* Filter row */}
         <div className="px-4 sm:px-6 py-3 border-b border-slate-100 flex items-center gap-3">
           <DepartmentFilterDropdown
             value={deptFilter}
@@ -180,8 +184,8 @@ export default function EmployeesPage() {
           </span>
         </div>
 
-        {/* ------- Desktop table ------- */}
-        <div className="hidden md:block overflow-x-auto rounded-b-2xl">
+        {/* Desktop table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
               <tr className="bg-slate-50 text-slate-500 text-left text-xs uppercase tracking-wider">
@@ -189,13 +193,15 @@ export default function EmployeesPage() {
                 <th className="px-6 py-3 font-semibold">Employee</th>
                 <th className="px-6 py-3 font-semibold">Department</th>
                 <th className="px-6 py-3 font-semibold">Role</th>
-                <th className="px-6 py-3 font-semibold text-right">Actions</th>
+                {canManage && (
+                  <th className="px-6 py-3 font-semibold text-right">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center">
+                  <td colSpan={canManage ? 5 : 4} className="px-6 py-12 text-center">
                     <div className="inline-block w-5 h-5 border-2 border-slate-300 border-t-green-600 rounded-full animate-spin" />
                     <p className="mt-2 text-xs text-slate-500">Loading…</p>
                   </td>
@@ -204,7 +210,7 @@ export default function EmployeesPage() {
 
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center">
+                  <td colSpan={canManage ? 5 : 4} className="px-6 py-12 text-center">
                     <EmptyState employees={employees} />
                   </td>
                 </tr>
@@ -236,16 +242,18 @@ export default function EmployeesPage() {
                       <td className="px-6 py-3 text-slate-600 uppercase">
                         {e.role}
                       </td>
-                      <td className="px-6 py-3">
-                        <RowActions
-                          employee={e}
-                          confirmId={confirmId}
-                          onEdit={() => openEdit(e)}
-                          onAskDelete={() => setConfirmId(e.id)}
-                          onCancelDelete={() => setConfirmId(null)}
-                          onConfirmDelete={() => handleDelete(e.id)}
-                        />
-                      </td>
+                      {canManage && (
+                        <td className="px-6 py-3">
+                          <RowActions
+                            employee={e}
+                            confirmId={confirmId}
+                            onEdit={() => openEdit(e)}
+                            onAskDelete={() => setConfirmId(e.id)}
+                            onCancelDelete={() => setConfirmId(null)}
+                            onConfirmDelete={() => handleDelete(e.id)}
+                          />
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -253,8 +261,8 @@ export default function EmployeesPage() {
           </table>
         </div>
 
-        {/* ------- Mobile cards ------- */}
-        <div className="md:hidden divide-y divide-slate-100 rounded-b-2xl overflow-hidden">
+        {/* Mobile cards */}
+        <div className="md:hidden divide-y divide-slate-100">
           {loading && (
             <div className="px-4 py-12 text-center">
               <div className="inline-block w-5 h-5 border-2 border-slate-300 border-t-green-600 rounded-full animate-spin" />
@@ -293,37 +301,39 @@ export default function EmployeesPage() {
                     {e.role}
                   </div>
 
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={() => openEdit(e)}
-                      className="flex-1 text-xs font-semibold text-green-700 py-2 rounded-lg bg-green-50 hover:bg-green-100 transition"
-                    >
-                      Edit
-                    </button>
-                    {confirmId === e.id ? (
-                      <>
-                        <button
-                          onClick={() => handleDelete(e.id)}
-                          className="flex-1 text-xs font-semibold text-white bg-rose-600 py-2 rounded-lg hover:bg-rose-700 transition"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          onClick={() => setConfirmId(null)}
-                          className="flex-1 text-xs font-semibold text-slate-600 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
+                  {canManage && (
+                    <div className="flex gap-2 pt-1">
                       <button
-                        onClick={() => setConfirmId(e.id)}
-                        className="flex-1 text-xs font-semibold text-rose-600 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 transition"
+                        onClick={() => openEdit(e)}
+                        className="flex-1 text-xs font-semibold text-green-700 py-2 rounded-lg bg-green-50 hover:bg-green-100 transition"
                       >
-                        Delete
+                        Edit
                       </button>
-                    )}
-                  </div>
+                      {confirmId === e.id ? (
+                        <>
+                          <button
+                            onClick={() => handleDelete(e.id)}
+                            className="flex-1 text-xs font-semibold text-white bg-rose-600 py-2 rounded-lg hover:bg-rose-700 transition"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            onClick={() => setConfirmId(null)}
+                            className="flex-1 text-xs font-semibold text-slate-600 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmId(e.id)}
+                          className="flex-1 text-xs font-semibold text-rose-600 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 transition"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -333,7 +343,7 @@ export default function EmployeesPage() {
   );
 }
 
-/* ------------------ Department filter dropdown (scheduler-style) ------------------ */
+/* ------------------ Department filter dropdown ------------------ */
 function DepartmentFilterDropdown({ value, onChange, counts }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
@@ -361,11 +371,11 @@ function DepartmentFilterDropdown({ value, onChange, counts }) {
   const activeCount = counts[value] ?? 0;
 
   const options = [
-  { value: "all", label: "All departments" },
-  ...[...DEPARTMENTS]
-    .sort((a, b) => a.localeCompare(b))
-    .map((d) => ({ value: d, label: d })),
-];
+    { value: "all", label: "All departments" },
+    ...[...DEPARTMENTS]
+      .sort((a, b) => a.localeCompare(b))
+      .map((d) => ({ value: d, label: d })),
+  ];
 
   return (
     <div ref={wrapRef} className="relative">
@@ -414,7 +424,7 @@ function DepartmentFilterDropdown({ value, onChange, counts }) {
       </button>
 
       {open && (
-        <div className="absolute z-40 top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-xl ring-1 ring-slate-200 p-1.5">
+        <div className="absolute z-50 top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-xl ring-1 ring-slate-200 p-1.5">
           <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
             Filter by department
           </div>

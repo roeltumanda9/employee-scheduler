@@ -18,27 +18,30 @@ function bannerFor(deptLabel, isAll) {
   return DEPT_BANNERS[deptLabel] || DEFAULT_BANNER;
 }
 
-export default function SchedulerPage() {
+export default function SchedulerPage({ role }) {
+  const canEdit = role === "super_admin" || role === "admin";
+
   const today = new Date();
   const [month, setMonth] = useState(() => {
-  const v = parseInt(localStorage.getItem("hmc_sched_month"), 10);
-  return v >= 1 && v <= 12 ? v : today.getMonth() + 1;
-});
+    const v = parseInt(localStorage.getItem("hmc_sched_month"), 10);
+    return v >= 1 && v <= 12 ? v : today.getMonth() + 1;
+  });
 
-const [year, setYear] = useState(() => {
-  const v = parseInt(localStorage.getItem("hmc_sched_year"), 10);
-  return v >= 2000 && v <= 2100 ? v : today.getFullYear();
-});
+  const [year, setYear] = useState(() => {
+    const v = parseInt(localStorage.getItem("hmc_sched_year"), 10);
+    return v >= 2000 && v <= 2100 ? v : today.getFullYear();
+  });
 
-const [half, setHalf] = useState(() => {
-  const v = parseInt(localStorage.getItem("hmc_sched_half"), 10);
-  return v === 2 ? 2 : 1;
-});
+  const [half, setHalf] = useState(() => {
+    const v = parseInt(localStorage.getItem("hmc_sched_half"), 10);
+    return v === 2 ? 2 : 1;
+  });
 
-const [dept, setDept] = useState(() => {
-  const v = localStorage.getItem("hmc_sched_dept");
-  return v || "all";
-});
+  const [dept, setDept] = useState(() => {
+    const v = localStorage.getItem("hmc_sched_dept");
+    return v || "all";
+  });
+
   const [employees, setEmployees] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -93,18 +96,15 @@ const [dept, setDept] = useState(() => {
     // eslint-disable-next-line
   }, [month, year]);
 
-
   useEffect(() => {
-  localStorage.setItem("hmc_sched_month", String(month));
-  localStorage.setItem("hmc_sched_year", String(year));
-  localStorage.setItem("hmc_sched_half", String(half));
-  localStorage.setItem("hmc_sched_dept", dept);
-}, [month, year, half, dept]);
-
-
+    localStorage.setItem("hmc_sched_month", String(month));
+    localStorage.setItem("hmc_sched_year", String(year));
+    localStorage.setItem("hmc_sched_half", String(half));
+    localStorage.setItem("hmc_sched_dept", dept);
+  }, [month, year, half, dept]);
 
   async function setStatus(employeeId, iso, status) {
-    if (isAllDepts) return;
+    if (isAllDepts || !canEdit) return;
 
     const existing = schedules.find(
       (s) => s.employee_id === employeeId && s.date === iso
@@ -145,7 +145,7 @@ const [dept, setDept] = useState(() => {
   }
 
   async function clearHalf() {
-    if (isAllDepts) return;
+    if (isAllDepts || !canEdit) return;
 
     const empIds = visibleEmployees.map((e) => e.id);
     if (empIds.length === 0 || days.length === 0) return;
@@ -190,6 +190,7 @@ const [dept, setDept] = useState(() => {
   /* ---------------- PRINT ---------------- */
   function handlePrint() {
     const deptLabel = isAllDepts ? "All Departments" : dept;
+
     const lookup = {};
     for (const s of schedules) {
       lookup[`${s.employee_id}|${s.date}`] = s.status;
@@ -292,21 +293,19 @@ const [dept, setDept] = useState(() => {
       width: 100%;
     }
 
-    /* ---------- Header ---------- */
     .header {
       text-align: center;
       margin-bottom: 2mm;
     }
     .header img {
-  display: block;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 320mm;
-  max-height: 45mm;
-  object-fit: contain;
-}
+      display: block;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 320mm;
+      max-height: 45mm;
+      object-fit: contain;
+    }
 
-    /* ---------- Info bar ---------- */
     .infobar {
       display: flex;
       align-items: center;
@@ -342,7 +341,6 @@ const [dept, setDept] = useState(() => {
     .info-right .line2 strong { color: #111; }
     .info-right .line2 .value { color: #15803d; font-weight: 800; }
 
-    /* ---------- Table ---------- */
     table {
       border-collapse: collapse;
       table-layout: fixed;
@@ -395,7 +393,6 @@ const [dept, setDept] = useState(() => {
       text-overflow: ellipsis;
     }
 
-    /* ===== FIXED CELL SIZE ===== */
     td.cell {
       height: 20px;
       min-height: 20px;
@@ -410,7 +407,6 @@ const [dept, setDept] = useState(() => {
     td.cell.cell-off { background: #e2e8f0 !important; color: #334155 !important; }
     td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
 
-    /* Summary headers — stacked labels, no clipping */
     th.sum-h {
       font-weight: 800;
       font-size: 7pt;
@@ -449,7 +445,6 @@ const [dept, setDept] = useState(() => {
 
     tr { page-break-inside: avoid; }
 
-    /* ---------- Signatures ---------- */
     .signatures {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -483,9 +478,9 @@ const [dept, setDept] = useState(() => {
     }
 
     @page {
-  size: landscape;
-  margin: 6mm 5mm;
-} 
+      size: 13in 8.5in;
+      margin: 6mm 5mm;
+    }
     @media print {
       html, body { background: #fff; }
       .page { padding: 0; }
@@ -495,9 +490,8 @@ const [dept, setDept] = useState(() => {
 <body>
   <div class="page">
     <div class="header">
-  <img src="${bannerFor(deptLabel, isAllDepts)}" alt="${deptLabel}" />
-</div>
-
+      <img src="${bannerFor(deptLabel, isAllDepts)}" alt="${deptLabel}" />
+    </div>
 
     <div class="infobar">
       <div class="month-title">${months[month - 1]} ${year}</div>
@@ -517,7 +511,7 @@ const [dept, setDept] = useState(() => {
         <col style="width:15%" />
         ${days.map(() => `<col style="width:3.2%" />`).join("")}
         <col style="width:7%" />
-        <col style="width:7%" /> 
+        <col style="width:7%" />
         <col style="width:7%" />
       </colgroup>
       <thead>
@@ -569,7 +563,6 @@ const [dept, setDept] = useState(() => {
 </body>
 </html>`;
 
-    // ---- Same-tab print via off-screen iframe ----
     const iframe = document.createElement("iframe");
     iframe.style.position = "fixed";
     iframe.style.left = "-10000px";
@@ -628,7 +621,15 @@ const [dept, setDept] = useState(() => {
     [visibleEmployees]
   );
   const halfDaySet = new Set(days.map((d) => d.iso));
-  
+  const stats = { AM: 0, PM: 0, D: 0, OFF: 0 };
+  for (const s of schedules) {
+    if (!halfDaySet.has(s.date)) continue;
+    if (!visibleIds.has(s.employee_id)) continue;
+    if (stats[s.status] !== undefined) stats[s.status]++;
+  }
+  const totalCells = visibleEmployees.length * days.length;
+  const filledCells = stats.AM + stats.PM + stats.D + stats.OFF;
+  const emptyCells = totalCells - filledCells;
 
   return (
     <div className="space-y-5">
@@ -667,20 +668,22 @@ const [dept, setDept] = useState(() => {
 
           <DepartmentDropdown value={dept} onChange={setDept} />
 
-          <button
-            onClick={clearHalf}
-            disabled={isAllDepts || visibleEmployees.length === 0}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
-            title={isAllDepts ? "Not available in preview mode" : "Clear this half"}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-              <path d="M10 11v6" />
-              <path d="M14 11v6" />
-            </svg>
-            Clear
-          </button>
+          {canEdit && (
+            <button
+              onClick={clearHalf}
+              disabled={isAllDepts || visibleEmployees.length === 0}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              title={isAllDepts ? "Not available in preview mode" : "Clear this half"}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+              Clear
+            </button>
+          )}
 
           <button
             onClick={handlePrint}
@@ -722,7 +725,7 @@ const [dept, setDept] = useState(() => {
           </div>
 
           <div className="ml-auto flex items-center gap-3">
-            {isAllDepts && (
+            {(isAllDepts || !canEdit) && (
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-green-700 bg-green-50 ring-1 ring-green-100 rounded-full px-2.5 py-1">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -735,9 +738,9 @@ const [dept, setDept] = useState(() => {
         </div>
       </div>
 
-      <div className="max-w-xs">
-  <StatCard label="Employees" value={visibleEmployees.length} accent="green" />
-</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard label="Employees" value={visibleEmployees.length} />
+      </div>
 
       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 px-1">
         <span className="font-medium text-slate-500">Legend:</span>
@@ -769,7 +772,7 @@ const [dept, setDept] = useState(() => {
           days={days}
           schedules={schedules}
           onSetStatus={setStatus}
-          readOnly={isAllDepts}
+          readOnly={isAllDepts || !canEdit}
         />
       )}
     </div>

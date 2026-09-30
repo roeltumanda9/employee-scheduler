@@ -1,21 +1,58 @@
 import { useEffect, useState } from "react";
+import { supabase } from "./lib/supabase";
+import { getMyProfile, ROLE_LABELS, canSeeEmployees } from "./lib/auth";
+import LoginPage from "./pages/LoginPage";
 import EmployeesPage from "./pages/EmployeesPage";
 import SchedulerPage from "./pages/SchedulerPage";
 
 export default function App() {
-  const [page, setPage] = useState(() => {
-  const saved = localStorage.getItem("hmc_page");
-  return saved === "scheduler" || saved === "employees" ? saved : "employees";
-});
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [page, setPage] = useState(() => {
+    const saved = localStorage.getItem("hmc_page");
+    return saved === "scheduler" || saved === "employees" ? saved : "employees";
+  });
+
+  // --- Auth bootstrap ---
+  useEffect(() => {
+    let active = true;
+
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!active) return;
+      setSession(data.session);
+      if (data.session) {
+        const p = await getMyProfile();
+        if (active) setProfile(p);
+      }
+      setAuthLoading(false);
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_e, s) => {
+      setSession(s);
+      if (s) {
+        const p = await getMyProfile();
+        setProfile(p);
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [page]);
 
   useEffect(() => {
-  localStorage.setItem("hmc_page", page);
-}, [page]);
+    localStorage.setItem("hmc_page", page);
+  }, [page]);
 
   useEffect(() => {
     if (sidebarOpen) {
@@ -27,14 +64,43 @@ export default function App() {
     }
   }, [sidebarOpen]);
 
+  // --- Loading ---
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-6 h-6 border-2 border-slate-300 border-t-green-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // --- Not signed in ---
+  if (!session) return <LoginPage />;
+
+  // --- Profile still loading ---
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-6 h-6 border-2 border-slate-300 border-t-green-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const role = profile.role;
+  const showEmployees = canSeeEmployees(role);
+
+  // Guard: if role can't see Employees, force scheduler
+  const effectivePage =
+    !showEmployees && page === "employees" ? "scheduler" : page;
+
   const navItems = [
-    { id: "employees", label: "Employees", icon: "👥" },
+    ...(showEmployees
+      ? [{ id: "employees", label: "Employees", icon: "👥" }]
+      : []),
     { id: "scheduler", label: "Scheduler", icon: "📅" },
   ];
 
   return (
     <div className="min-h-screen flex bg-slate-50">
-      {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm md:hidden"
@@ -48,25 +114,23 @@ export default function App() {
           bg-green-50/70 border-r border-green-100
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
-        {/* Header */}
         <div className="px-5 py-5 border-b border-green-100 flex items-center justify-between">
           <div className="flex flex-col items-center text-center gap-3 w-full min-w-0">
-  <img
-    src="/logo.png"
-    alt="Hofilena Medical Centre"
-    className="w-40 h-40 rounded-full bg-white p-0.5 shrink-0 ring-1 ring-green-100"
-  />
-  <div className="min-w-0 w-full">
-  <h1 className="text-xl font-bold tracking-tight leading-tight text-green-900">
-    Hofilena Medical Centrum
-  </h1>
-  <p className="text-sm text-green-700/70 leading-tight mt-1">
-    Employee Scheduler
-  </p>
-</div>
-</div>
+            <img
+              src="/logo.png"
+              alt="Hofilena Medical Centre"
+              className="w-16 h-16 rounded-full bg-white p-0.5 shrink-0 ring-1 ring-green-100"
+            />
+            <div className="min-w-0 w-full">
+              <h1 className="text-sm font-bold tracking-tight leading-tight text-green-900">
+                Hofilena Medical Centre
+              </h1>
+              <p className="text-[11px] text-green-700/70 leading-tight mt-0.5">
+                Employee Scheduler
+              </p>
+            </div>
+          </div>
 
-          {/* Close button (mobile) */}
           <button
             onClick={() => setSidebarOpen(false)}
             className="md:hidden w-8 h-8 grid place-items-center rounded-lg text-green-800 hover:bg-green-100 transition shrink-0"
@@ -79,10 +143,9 @@ export default function App() {
           </button>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => {
-            const active = page === item.id;
+            const active = effectivePage === item.id;
             return (
               <button
                 key={item.id}
@@ -100,20 +163,38 @@ export default function App() {
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 text-[11px] text-green-800/60 border-t border-green-100">
-          v1.0
+        {/* Footer: signed in as + role + sign out */}
+        <div className="p-3 border-t border-green-100 space-y-2">
+          <div className="px-3 py-2">
+            <p className="text-[10px] uppercase tracking-wider text-green-800/60 font-semibold">
+              Signed in as
+            </p>
+            <p className="text-xs text-green-900 truncate">
+              {profile.email}
+            </p>
+            <p className="text-[10px] text-green-700/70 mt-0.5">
+              {ROLE_LABELS[role] || role}
+            </p>
+          </div>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-green-800 hover:bg-green-100/70 transition"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Sign out
+          </button>
         </div>
       </aside>
 
       {/* Main content */}
       <main className="flex-1 min-w-0 flex flex-col">
-        {/* Top header */}
         <header className="relative bg-white border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-3 sticky top-0 z-30">
-          {/* Green top accent */}
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-500 to-green-700" />
 
-          {/* Hamburger (mobile) */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 transition"
@@ -127,12 +208,16 @@ export default function App() {
           </button>
 
           <h2 className="text-base md:text-lg font-semibold text-green-800 capitalize">
-            {page}
+            {effectivePage}
           </h2>
         </header>
 
         <div className="p-4 md:p-6 flex-1">
-          {page === "employees" ? <EmployeesPage /> : <SchedulerPage />}
+          {effectivePage === "employees" ? (
+            <EmployeesPage role={role} />
+          ) : (
+            <SchedulerPage role={role} />
+          )}
         </div>
       </main>
     </div>
