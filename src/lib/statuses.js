@@ -47,7 +47,7 @@ export const STATUS_MAP = Object.fromEntries(
 export const STATUSES_BY_DEPARTMENT = {
   "Amysthetic":         ["DUTY", "OFF"],
   "H Hotel":            ["NS", "DS", "EDS", "GS", "OFF"],
-  "Grocery / Pharmacy": ["MS", "AS", "OFF"],
+  "JA Grocery / Pharmacy": ["MS", "AS", "OFF"],
   "Wellness":           ["DUTY", "OFF"],
   "johanju":            ["DUTY", "OFF"],
   "HMC":                ["DUTY", "OFF"],

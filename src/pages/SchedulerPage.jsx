@@ -11,7 +11,7 @@ const DEPT_BANNERS = {
   "H Hotel":             "/logo-banner-hhotel.png",
   "JA Grocery / Pharmacy":  "/logo-banner-jagrocery.png",
   "Wellness":            "/logo-banner-wellness.png",
-  "johanju":             "/logo-banner-johanju.png",
+  "Johanju":             "/logo-banner-johanju.png",
   "HMC":                 "/logo-banner.png",
   "HMC Laboratory":      "/logo-banner.png",
   "Hofitea":             "/logo-banner-hofitea.png",
