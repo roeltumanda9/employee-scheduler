@@ -83,24 +83,32 @@ export default function EmployeesPage({ role }) {
   }
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return employees.filter((e) => {
-      if (deptFilter !== "all" && e.department !== deptFilter) return false;
-      if (!q) return true;
-      const haystack = [
-        e.first_name,
-        e.middle_name,
-        e.last_name,
-        e.name,
-        e.number,
-        e.role,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [employees, search, deptFilter]);
+  const q = search.trim().toLowerCase();
+  const result = employees.filter((e) => {
+    if (deptFilter !== "all" && e.department !== deptFilter) return false;
+    if (!q) return true;
+    const haystack = [
+      e.first_name,
+      e.middle_name,
+      e.last_name,
+      e.name,
+      e.number,
+      e.role,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(q);
+  });
+
+  // Sort by department (A–Z), then by name (A–Z)
+  return [...result].sort((a, b) => {
+    if (a.department !== b.department) {
+      return a.department.localeCompare(b.department);
+    }
+    return (a.name || "").localeCompare(b.name || "");
+  });
+}, [employees, search, deptFilter]);
 
   const counts = useMemo(() => {
     const c = { all: employees.length };
@@ -217,16 +225,16 @@ export default function EmployeesPage({ role }) {
               )}
 
               {!loading &&
-                filtered.map((e) => {
-                  const full = displayName(e);
-                  return (
+  filtered.map((e, index) => {
+    const full = displayName(e);
+    return (
                     <tr
                       key={e.id}
                       className="hover:bg-green-50/40 transition-colors"
                     >
                       <td className="px-6 py-3 text-slate-600 font-mono text-xs">
-                        {e.number}
-                      </td>
+  {index + 1}
+</td>
                       <td className="px-6 py-3">
                         <div className="font-medium text-slate-800 truncate uppercase">
                           {full || "—"}
@@ -277,18 +285,18 @@ export default function EmployeesPage({ role }) {
           )}
 
           {!loading &&
-            filtered.map((e) => {
-              const full = displayName(e);
-              return (
-                <div key={e.id} className="p-4 space-y-3">
+  filtered.map((e, index) => {
+    const full = displayName(e);
+    return (
+      <div key={e.id} className="p-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-semibold text-slate-800 truncate uppercase">
                         {full || "—"}
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono mt-0.5">
-                        #{e.number}
-                      </div>
+  #{index + 1}
+</div>
                     </div>
                     <span
                       className={`inline-flex shrink-0 items-center text-[10px] font-medium rounded-full px-2 py-1 ring-1 ${DEPT_BADGE}`}

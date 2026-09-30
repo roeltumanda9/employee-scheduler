@@ -174,26 +174,7 @@ export default function EmployeeForm({ open, editing, onDone, onCancel }) {
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="p-4 sm:p-6 overflow-y-auto space-y-5">
-            {/* Employee number */}
-            <Field label="Employee number">
-              <input
-                required
-                value={loadingNumber ? "Loading…" : form.number}
-                onChange={(e) => update("number", e.target.value)}
-                readOnly={!editing}
-                placeholder="Auto-assigned"
-                className={`w-full max-w-xs rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition ${
-                  editing
-                    ? "bg-slate-50/50 text-slate-800 focus:bg-white"
-                    : "bg-slate-100 text-slate-500 cursor-not-allowed"
-                }`}
-              />
-              {!editing && (
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Auto-assigned based on the last registered employee.
-                </p>
-              )}
-            </Field>
+            
 
             {/* Name row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
