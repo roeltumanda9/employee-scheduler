@@ -3,6 +3,8 @@ import { supabase } from "../lib/supabase";
 import { getDaysInMonth } from "../lib/dates";
 import { DEPARTMENTS } from "../lib/departments";
 import ScheduleGrid from "../components/ScheduleGrid";
+import { STATUS_MAP, STATUSES_BY_DEPARTMENT } from "../lib/statuses";
+
 
 const DEPT_BANNERS = {
   "Amysthetic Department": "/logo-banner-amystethic.png",
@@ -269,14 +271,11 @@ export default function SchedulerPage({ role }) {
         const cells = days
           .map((d) => {
             const st = lookup[`${emp.id}|${d.iso}`];
-            if (st === "AM" || st === "PM" || st === "D") present++;
-            else if (st === "OFF") off++;
+            if (st && st !== "OFF") present++;
+else if (st === "OFF") off++;
 
             let cls = "cell";
-            if (st === "AM") cls += " cell-am";
-            else if (st === "PM") cls += " cell-pm";
-            else if (st === "D") cls += " cell-d";
-            else if (st === "OFF") cls += " cell-off";
+if (st) cls += ` cell-${st.toLowerCase()}`;
 
             return `<td class="${cls}">${st || ""}</td>`;
           })
@@ -307,7 +306,7 @@ export default function SchedulerPage({ role }) {
         let count = 0;
         for (const emp of visibleEmployees) {
           const st = lookup[`${emp.id}|${d.iso}`];
-          if (st === "AM" || st === "PM" || st === "D") count++;
+          if (st && st !== "OFF") count++;
         }
         return `<td class="cell total">${count}</td>`;
       })
@@ -316,6 +315,29 @@ export default function SchedulerPage({ role }) {
     const halfLabel =
       half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`;
 
+      // Build a legend of the shifts actually used in this printed view.
+// Only shows shifts that appear at least once, so the legend stays clean.
+const usedCodes = new Set();
+for (const s of schedules) {
+  if (!halfDaySet.has(s.date)) continue;
+  if (!visibleIds.has(s.employee_id)) continue;
+  if (s.status) usedCodes.add(s.status);
+}
+
+// For "All departments" the shifts may differ per dept, so always include
+// the ones visible. If a specific department is selected, use its allowed
+// shifts + OFF.
+const legendCodes = isAllDepts
+  ? Array.from(usedCodes)
+  : (() => {
+      const codes = STATUSES_BY_DEPARTMENT[dept] || [];
+      return Array.from(new Set([...codes, "OFF"]));
+    })();
+
+const legendItems = legendCodes
+  .map((code) => STATUS_MAP[code])
+  .filter(Boolean);
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -323,6 +345,8 @@ export default function SchedulerPage({ role }) {
   <meta charset="utf-8" />
   <title>Schedule — ${deptLabel} — ${months[month - 1]} ${year}</title>
   <style>
+
+
     * { box-sizing: border-box; }
     html, body {
       margin: 0;
@@ -367,6 +391,40 @@ export default function SchedulerPage({ role }) {
       border-top: 1.5px solid #15803d;
       border-bottom: 1.5px solid #15803d;
     }
+
+    /* ---------- Inline legend in infobar ---------- */
+.legend-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5mm 4mm;
+  padding: 0 4mm;
+  flex: 1;
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5mm;
+  font-size: 8pt;
+}
+.legend-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 9mm;
+  height: 5mm;
+  padding: 0 1.5mm;
+  border-radius: 1mm;
+  font-weight: 800;
+  font-size: 7pt;
+  color: #111;
+  border: 1px solid #cbd5e1;
+}
+.legend-text {
+  color: #111;
+  white-space: nowrap;
+}
     .month-title {
       font-size: 18pt;
       font-weight: 800;
@@ -452,11 +510,31 @@ export default function SchedulerPage({ role }) {
       background: #fff;
       color: #111;
     }
-    td.cell.cell-am { background: #93c5fd !important; color: #1e3a8a !important; }
-    td.cell.cell-pm { background: #fdba74 !important; color: #7c2d12 !important; }
-    td.cell.cell-d  { background: #7dd3fc !important; color: #0c4a6e !important; }
-    td.cell.cell-off { background: #e2e8f0 !important; color: #334155 !important; }
-    td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
+    td.cell.cell-duty { background: #7dd3fc !important; color: #0c4a6e !important; }
+td.cell.cell-ns   { background: #a5b4fc !important; color: #1e1b4b !important; }
+td.cell.cell-ds   { background: #fcd34d !important; color: #78350f !important; }
+td.cell.cell-eds  { background: #fdba74 !important; color: #7c2d12 !important; }
+td.cell.cell-gs   { background: #cbd5e1 !important; color: #0f172a !important; }
+td.cell.cell-ms   { background: #86efac !important; color: #14532d !important; }
+td.cell.cell-as   { background: #fda4af !important; color: #881337 !important; }
+td.cell.cell-rs   { background: #67e8f9 !important; color: #164e63 !important; }
+td.cell.cell-ls   { background: #c4b5fd !important; color: #3b0764 !important; }
+td.cell.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
+td.cell.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
+td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
+
+/* Legend chips — same colors as cells */
+.legend-code.cell-duty { background: #7dd3fc !important; color: #0c4a6e !important; }
+.legend-code.cell-ns   { background: #a5b4fc !important; color: #1e1b4b !important; }
+.legend-code.cell-ds   { background: #fcd34d !important; color: #78350f !important; }
+.legend-code.cell-eds  { background: #fdba74 !important; color: #7c2d12 !important; }
+.legend-code.cell-gs   { background: #cbd5e1 !important; color: #0f172a !important; }
+.legend-code.cell-ms   { background: #86efac !important; color: #14532d !important; }
+.legend-code.cell-as   { background: #fda4af !important; color: #881337 !important; }
+.legend-code.cell-rs   { background: #67e8f9 !important; color: #164e63 !important; }
+.legend-code.cell-ls   { background: #c4b5fd !important; color: #3b0764 !important; }
+.legend-code.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
+.legend-code.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
 
     th.sum-h {
       font-weight: 800;
@@ -495,38 +573,142 @@ export default function SchedulerPage({ role }) {
     tfoot td.sum.total { background: #e2e8f0 !important; }
 
     tr { page-break-inside: avoid; }
-
-    .signatures {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 30px;
-      margin-top: 8mm;
+    /* ---------- Shift Legend ---------- */
+    .legend {
+      margin-top: 4mm;
+      padding: 2mm 3mm;
+      border: 1px solid #333;
+      border-radius: 3px;
+      background: #f8fafc;
       page-break-inside: avoid;
     }
-    .sig { text-align: left; }
-    .sig .label-top {
-      font-size: 9pt;
-      color: #111;
-      margin-bottom: 0;
-    }
-    .sig .sign-space { height: 28px; }
-    .sig .name {
+    .legend-title {
+      font-size: 8pt;
       font-weight: 800;
-      font-size: 9.5pt;
+      letter-spacing: 1px;
+      color: #15803d;
       text-transform: uppercase;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-      text-decoration-thickness: 1.2px;
-      color: #111;
-      display: inline-block;
-      line-height: 1.15;
+      margin-bottom: 1.5mm;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 1mm;
     }
-    .sig .title {
-      font-size: 8.5pt;
-      color: #111;
-      margin-top: 2px;
-      font-weight: 500;
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3mm 6mm;
     }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 2mm;
+      font-size: 6.5pt;
+    }
+    .legend-code {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 8mm;
+      height: 4mm;
+      padding: 0 1.5mm;
+      border-radius: 1mm;
+      font-weight: 800;
+      font-size: 6pt;
+      color: #111;
+      border: 1px solid #cbd5e1;
+    }
+    .legend-text {
+      color: #111;
+      font-size: 7.5pt;
+    }
+    .legend-text strong {
+      font-weight: 700;
+    }
+
+    /* ---------- Shift Legend (inside thead) ---------- */
+.legend-row td.legend-cell {
+  padding: 2mm 3mm;
+  background: #f8fafc;
+  border: 1px solid #111;
+  border-bottom: 2px solid #15803d;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2mm 5mm;
+  text-align: left;
+}
+.legend-title {
+  font-size: 8pt;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #15803d;
+  text-transform: uppercase;
+  margin-right: 2mm;
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5mm;
+  font-size: 7.5pt;
+}
+.legend-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 10mm;
+  height: 5mm;
+  padding: 0 1.5mm;
+  border-radius: 1mm;
+  font-weight: 800;
+  font-size: 7pt;
+  color: #111;
+  border: 1px solid #cbd5e1;
+}
+.legend-text {
+  color: #111;
+}
+
+    /* ---------- Signatures ---------- */
+.signatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12mm;
+  margin-top: 6mm;
+  page-break-inside: avoid;
+}
+.sig {
+  text-align: left;
+}
+.sig .label-top {
+  font-size: 9pt;
+  color: #111;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+.sig .sign-space {
+  height: 22px;
+}
+.sig .name {
+  font-weight: 800;
+  font-size: 9pt;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  color: #111;
+  display: block;
+  line-height: 1.2;
+  white-space: normal;
+  word-break: keep-all;
+}
+.sig .title {
+  font-size: 8pt;
+  color: #111;
+  margin-top: 2px;
+  font-weight: 500;
+  white-space: nowrap;
+}
 
     @page {
       size: 13in 8.5in;
@@ -544,8 +726,27 @@ export default function SchedulerPage({ role }) {
       <img src="${bannerFor(deptLabel, isAllDepts)}" alt="${deptLabel}" />
     </div>
 
-    <div class="infobar">
+        <div class="infobar">
       <div class="month-title">${months[month - 1]} ${year}</div>
+
+      <div class="legend-inline">
+        ${legendItems
+          .map(
+            (s) => `
+          <span class="legend-item">
+            <span class="legend-code ${
+              s.code === "DUTY"
+                ? "cell-duty"
+                : "cell-" + s.code.toLowerCase()
+            }">${s.code}</span>
+            <span class="legend-text">
+              ${s.label}${s.time ? ` — ${s.time}` : ""}
+            </span>
+          </span>`
+          )
+          .join("")}
+      </div>
+
       <div class="info-right">
         <div class="line1">Department: <strong>${deptLabel}</strong></div>
         <div class="line2">
@@ -565,7 +766,7 @@ export default function SchedulerPage({ role }) {
         <col style="width:7%" />
         <col style="width:7%" />
       </colgroup>
-      <thead>
+             <thead>
         <tr>
           <th class="num-h">#</th>
           <th class="name-h">NAME</th>
@@ -590,7 +791,11 @@ export default function SchedulerPage({ role }) {
       </tfoot>
     </table>
 
-    <div class="signatures">
+    </tfoot>
+    </table>
+
+
+        <div class="signatures">
       <div class="sig">
         <div class="label-top">Prepared by:</div>
         <div class="sign-space"></div>
@@ -610,6 +815,7 @@ export default function SchedulerPage({ role }) {
         <div class="title">Medical Director</div>
       </div>
     </div>
+
   </div>
 </body>
 </html>`;
@@ -809,13 +1015,12 @@ export default function SchedulerPage({ role }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 px-1">
-        <span className="font-medium text-slate-500">Legend:</span>
-        <LegendChip color="bg-blue-500" label="AM" />
-        <LegendChip color="bg-amber-500" label="PM" />
-        <LegendChip color="bg-sky-500" label="Duty" />
-        <LegendChip color="bg-slate-300" label="OFF" />
-        <LegendChip color="bg-white ring-1 ring-slate-300" label="Unassigned" />
-      </div>
+  <span className="font-medium text-slate-500">
+    Shifts shown in each cell depend on the employee's department.
+  </span>
+  <LegendChip color="bg-slate-300" label="OFF" />
+  <LegendChip color="bg-white ring-1 ring-slate-300" label="Unassigned" />
+</div>
 
       {loading ? (
         <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-12 text-center">

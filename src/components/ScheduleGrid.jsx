@@ -39,7 +39,7 @@ export default function ScheduleGrid({
     let count = 0;
     for (const emp of employees) {
       const st = lookup[`${emp.id}|${d.iso}`]?.status;
-if (st === "AM" || st === "PM" || st === "D") count++;
+if (st && st !== "OFF") count++;
     }
     dailyManpower[d.iso] = count;
   }
@@ -49,8 +49,8 @@ let grandOff = 0;
 for (const emp of employees) {
   for (const d of days) {
     const st = lookup[`${emp.id}|${d.iso}`]?.status;
-    if (st === "AM" || st === "PM" || st === "D") grandPresent++;
-    else if (st === "OFF") grandOff++;
+    if (st && st !== "OFF") grandPresent++;
+else if (st === "OFF") grandOff++;
   }
 }
 const grandTotal = grandPresent;  
@@ -131,8 +131,8 @@ const grandTotal = grandPresent;
 let off = 0;
 for (const d of days) {
   const st = lookup[`${emp.id}|${d.iso}`]?.status;
-  if (st === "AM" || st === "PM" || st === "D") present++;
-  else if (st === "OFF") off++;
+  if (st && st !== "OFF") present++;
+else if (st === "OFF") off++;
 }
 const total = present; 
 
@@ -391,25 +391,34 @@ function Popup({ pos, statuses, onClose, onPick }) {
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div
-        className="fixed z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 w-52"
+        className="fixed z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 w-72"
         style={{ top: pos.top, left: pos.left }}
       >
         <div className="px-3 py-1.5 text-xs uppercase tracking-wider text-slate-400 font-semibold">
-          Set status
+          Set shift
         </div>
 
         {statuses.map((s) => (
           <button
             key={s.code}
             onClick={() => onPick(s.code)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-base rounded-xl hover:bg-slate-100 transition"
+            className="w-full flex items-start gap-3 px-3 py-2.5 text-sm rounded-xl hover:bg-slate-100 transition text-left"
           >
             <span
-              className={`w-14 h-9 rounded-lg text-sm font-bold flex items-center justify-center ${s.classes}`}
+              className={`min-w-[52px] h-9 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 ${s.classes}`}
             >
               {s.code}
             </span>
-            <span className="text-slate-700 font-medium">{s.label}</span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-slate-800 font-medium truncate">
+                {s.label}
+              </span>
+              {s.time && (
+                <span className="block text-[11px] text-slate-500 mt-0.5">
+                  {s.time}
+                </span>
+              )}
+            </span>
           </button>
         ))}
 
@@ -417,7 +426,7 @@ function Popup({ pos, statuses, onClose, onPick }) {
 
         <button
           onClick={() => onPick(null)}
-          className="w-full text-left px-3 py-2.5 text-base rounded-xl hover:bg-rose-50 text-rose-600 font-medium transition"
+          className="w-full text-left px-3 py-2.5 text-sm rounded-xl hover:bg-rose-50 text-rose-600 font-medium transition"
         >
           Clear
         </button>
