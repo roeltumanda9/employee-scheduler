@@ -786,7 +786,7 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
       <tfoot>
         <tr>
           <td class="num"></td>
-          <td class="name">TOTAL MANPOWER</td>
+          <td class="name">TOTAL MANPOWER OF THE DAY</td>
           ${dailyTotals}
           <td class="sum present">${grandPresent}</td>
           <td class="sum off">${grandOff}</td>
