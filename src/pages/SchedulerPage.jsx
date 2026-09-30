@@ -3,18 +3,21 @@ import { supabase } from "../lib/supabase";
 import { getDaysInMonth } from "../lib/dates";
 import { DEPARTMENTS } from "../lib/departments";
 import ScheduleGrid from "../components/ScheduleGrid";
-import { STATUS_MAP, STATUSES_BY_DEPARTMENT, resolveStatus } from "../lib/statuses";
-
+import {
+  STATUS_MAP,
+  STATUSES_BY_DEPARTMENT,
+  resolveStatus,
+} from "../lib/statuses";
 
 const DEPT_BANNERS = {
-  "Amysthetic":          "/logo-banner-amystethic.png",
-  "H Hotel":             "/logo-banner-hhotel.png",
-  "JA Grocery / Pharmacy":  "/logo-banner-jagrocery.png",
-  "Wellness":            "/logo-banner-wellness.png",
-  "Johanju":             "/logo-banner-johanju.png",
-  "HMC":                 "/logo-banner.png",
-  "HMC Laboratory":      "/logo-banner.png",
-  "Hofitea":             "/logo-banner-hofitea.png",
+  "Amysthetic":            "/logo-banner-amystethic.png",
+  "H Hotel":               "/logo-banner-hhotel.png",
+  "JA Grocery / Pharmacy": "/logo-banner-jagrocery.png",
+  "Wellness":              "/logo-banner-wellness.png",
+  "Johanju":               "/logo-banner-johanju.png",
+  "HMC":                   "/logo-banner.png",
+  "HMC Laboratory":        "/logo-banner.png",
+  "Hofitea":               "/logo-banner-hofitea.png",
 };
 
 const DEFAULT_BANNER = "/logo-banner.png";
@@ -23,6 +26,18 @@ function bannerFor(deptLabel, isAll) {
   if (isAll) return DEFAULT_BANNER;
   return DEPT_BANNERS[deptLabel] || DEFAULT_BANNER;
 }
+
+// Per-department "Prepared by" signatories.
+const PREPARED_BY = {
+  "Amysthetic":            { name: "VICARH-JENZEN CARDENAS",  title: "Info Clerk" },
+  "H Hotel":               { name: "LORRAINE JANE L. DUNKEN", title: "OIC-Manager" },
+  "JA Grocery / Pharmacy": { name: "BERNARD A. TABANAO",      title: "Pharmacist" },
+  "Wellness":              { name: "VALERIE MARIE CALLENERO", title: "Human Resource Manager" },
+  "Johanju":               { name: "BERNARD A. TABANAO",      title: "Pharmacist" },
+  "HMC":                   { name: "BERNARD A. TABANAO",      title: "Pharmacist" },
+  "HMC Laboratory":        { name: "VALERY AYAWON",           title: "MedTech" },
+  "Hofitea":               { name: "BERNARD A. TABANAO",      title: "Pharmacist" },
+};
 
 export default function SchedulerPage({ role }) {
   const canEdit = role === "super_admin" || role === "admin";
@@ -52,7 +67,6 @@ export default function SchedulerPage({ role }) {
   }
 
   // --- State ---
-
   const [confirmClear, setConfirmClear] = useState(false);
 
   const [month, setMonth] = useState(() => {
@@ -153,22 +167,22 @@ export default function SchedulerPage({ role }) {
   }, [month, year, half, dept]);
 
   useEffect(() => {
-  if (!confirmClear) return;
-  function onKey(e) {
-    if (e.key === "Escape") setConfirmClear(false);
-  }
-  window.addEventListener("keydown", onKey);
-  return () => window.removeEventListener("keydown", onKey);
-}, [confirmClear]);
+    if (!confirmClear) return;
+    function onKey(e) {
+      if (e.key === "Escape") setConfirmClear(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [confirmClear]);
 
-useEffect(() => {
-  if (!confirmClear) return;
-  const prev = document.body.style.overflow;
-  document.body.style.overflow = "hidden";
-  return () => {
-    document.body.style.overflow = prev;
-  };
-}, [confirmClear]);
+  useEffect(() => {
+    if (!confirmClear) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [confirmClear]);
 
   async function setStatus(employeeId, iso, status) {
     if (isAllDepts || !canEdit) return;
@@ -212,40 +226,40 @@ useEffect(() => {
   }
 
   // Opens the modern confirm modal
-function askClearHalf() {
-  if (isAllDepts || !canEdit) return;
-  const empIds = visibleEmployees.map((e) => e.id);
-  if (empIds.length === 0 || days.length === 0) return;
-  setConfirmClear(true);
-}
+  function askClearHalf() {
+    if (isAllDepts || !canEdit) return;
+    const empIds = visibleEmployees.map((e) => e.id);
+    if (empIds.length === 0 || days.length === 0) return;
+    setConfirmClear(true);
+  }
 
-// Actually clears once the user confirms
-async function confirmClearHalf() {
-  setConfirmClear(false);
+  // Actually clears once the user confirms
+  async function confirmClearHalf() {
+    setConfirmClear(false);
 
-  const empIds = visibleEmployees.map((e) => e.id);
-  if (empIds.length === 0 || days.length === 0) return;
+    const empIds = visibleEmployees.map((e) => e.id);
+    if (empIds.length === 0 || days.length === 0) return;
 
-  const firstIso = days[0].iso;
-  const lastIso = days[days.length - 1].iso;
+    const firstIso = days[0].iso;
+    const lastIso = days[days.length - 1].iso;
 
-  const { error } = await supabase
-    .from("schedules")
-    .delete()
-    .in("employee_id", empIds)
-    .gte("date", firstIso)
-    .lte("date", lastIso);
+    const { error } = await supabase
+      .from("schedules")
+      .delete()
+      .in("employee_id", empIds)
+      .gte("date", firstIso)
+      .lte("date", lastIso);
 
-  if (error) return alert(error.message);
+    if (error) return alert(error.message);
 
-  const empIdSet = new Set(empIds);
-  const daySet = new Set(days.map((d) => d.iso));
-  setSchedules((prev) =>
-    prev.filter(
-      (s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))
-    )
-  );
-}
+    const empIdSet = new Set(empIds);
+    const daySet = new Set(days.map((d) => d.iso));
+    setSchedules((prev) =>
+      prev.filter(
+        (s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))
+      )
+    );
+  }
 
   function changeMonth(delta) {
     let m = month + delta;
@@ -299,10 +313,10 @@ async function confirmClearHalf() {
           .map((d) => {
             const st = lookup[`${emp.id}|${d.iso}`];
             if (st && st !== "OFF") present++;
-else if (st === "OFF") off++;
+            else if (st === "OFF") off++;
 
             let cls = "cell";
-if (st) cls += ` cell-${st.toLowerCase()}`;
+            if (st) cls += ` cell-${st.toLowerCase()}`;
 
             return `<td class="${cls}">${st || ""}</td>`;
           })
@@ -342,28 +356,29 @@ if (st) cls += ` cell-${st.toLowerCase()}`;
     const halfLabel =
       half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`;
 
-      // Build a legend of the shifts actually used in this printed view.
-// Only shows shifts that appear at least once, so the legend stays clean.
-const usedCodes = new Set();
-for (const s of schedules) {
-  if (!halfDaySet.has(s.date)) continue;
-  if (!visibleIds.has(s.employee_id)) continue;
-  if (s.status) usedCodes.add(s.status);
-}
+    // "Prepared by" — null when All Departments
+    const prepared = isAllDepts ? null : PREPARED_BY[dept] || null;
 
-// For "All departments" the shifts may differ per dept, so always include
-// the ones visible. If a specific department is selected, use its allowed
-// shifts + OFF.
-const legendCodes = isAllDepts
-  ? Array.from(usedCodes)
-  : (() => {
-      const codes = STATUSES_BY_DEPARTMENT[dept] || [];
-      return Array.from(new Set([...codes, "OFF"]));
-    })();
+    // Legend for the current printout
+    const usedCodes = new Set();
+    const halfDaySetLocal = new Set(days.map((d) => d.iso));
+    const visibleIdsLocal = new Set(visibleEmployees.map((e) => e.id));
+    for (const s of schedules) {
+      if (!halfDaySetLocal.has(s.date)) continue;
+      if (!visibleIdsLocal.has(s.employee_id)) continue;
+      if (s.status) usedCodes.add(s.status);
+    }
 
-const legendItems = legendCodes
-  .map((code) => resolveStatus(STATUS_MAP[code], dept))
-  .filter(Boolean);
+    const legendCodes = isAllDepts
+      ? Array.from(usedCodes)
+      : (() => {
+          const codes = STATUSES_BY_DEPARTMENT[dept] || [];
+          return Array.from(new Set([...codes, "OFF"]));
+        })();
+
+    const legendItems = legendCodes
+      .map((code) => resolveStatus(STATUS_MAP[code], dept))
+      .filter(Boolean);
 
     const html = `
 <!DOCTYPE html>
@@ -372,8 +387,6 @@ const legendItems = legendCodes
   <meta charset="utf-8" />
   <title>Schedule — ${deptLabel} — ${months[month - 1]} ${year}</title>
   <style>
-
-
     * { box-sizing: border-box; }
     html, body {
       margin: 0;
@@ -418,40 +431,38 @@ const legendItems = legendCodes
       border-top: 1.5px solid #15803d;
       border-bottom: 1.5px solid #15803d;
     }
-
-    /* ---------- Inline legend in infobar ---------- */
-.legend-inline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5mm 4mm;
-  padding: 0 4mm;
-  flex: 1;
-}
-.legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 1.5mm;
-  font-size: 8pt;
-}
-.legend-code {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 9mm;
-  height: 5mm;
-  padding: 0 1.5mm;
-  border-radius: 1mm;
-  font-weight: 800;
-  font-size: 7pt;
-  color: #111;
-  border: 1px solid #cbd5e1;
-}
-.legend-text {
-  color: #111;
-  white-space: nowrap;
-}
+    .legend-inline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5mm 4mm;
+      padding: 0 4mm;
+      flex: 1;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.5mm;
+      font-size: 8pt;
+    }
+    .legend-code {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 9mm;
+      height: 5mm;
+      padding: 0 1.5mm;
+      border-radius: 1mm;
+      font-weight: 800;
+      font-size: 7pt;
+      color: #111;
+      border: 1px solid #cbd5e1;
+    }
+    .legend-text {
+      color: #111;
+      white-space: nowrap;
+    }
     .month-title {
       font-size: 18pt;
       font-weight: 800;
@@ -538,30 +549,29 @@ const legendItems = legendCodes
       color: #111;
     }
     td.cell.cell-duty { background: #7dd3fc !important; color: #0c4a6e !important; }
-td.cell.cell-ns   { background: #a5b4fc !important; color: #1e1b4b !important; }
-td.cell.cell-ds   { background: #fcd34d !important; color: #78350f !important; }
-td.cell.cell-eds  { background: #fdba74 !important; color: #7c2d12 !important; }
-td.cell.cell-gs   { background: #cbd5e1 !important; color: #0f172a !important; }
-td.cell.cell-ms   { background: #86efac !important; color: #14532d !important; }
-td.cell.cell-as   { background: #fda4af !important; color: #881337 !important; }
-td.cell.cell-rs   { background: #67e8f9 !important; color: #164e63 !important; }
-td.cell.cell-ls   { background: #c4b5fd !important; color: #3b0764 !important; }
-td.cell.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
-td.cell.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
-td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
+    td.cell.cell-ns   { background: #a5b4fc !important; color: #1e1b4b !important; }
+    td.cell.cell-ds   { background: #fcd34d !important; color: #78350f !important; }
+    td.cell.cell-eds  { background: #fdba74 !important; color: #7c2d12 !important; }
+    td.cell.cell-gs   { background: #cbd5e1 !important; color: #0f172a !important; }
+    td.cell.cell-ms   { background: #86efac !important; color: #14532d !important; }
+    td.cell.cell-as   { background: #fda4af !important; color: #881337 !important; }
+    td.cell.cell-rs   { background: #67e8f9 !important; color: #164e63 !important; }
+    td.cell.cell-ls   { background: #c4b5fd !important; color: #3b0764 !important; }
+    td.cell.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
+    td.cell.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
+    td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
 
-/* Legend chips — same colors as cells */
-.legend-code.cell-duty { background: #7dd3fc !important; color: #0c4a6e !important; }
-.legend-code.cell-ns   { background: #a5b4fc !important; color: #1e1b4b !important; }
-.legend-code.cell-ds   { background: #fcd34d !important; color: #78350f !important; }
-.legend-code.cell-eds  { background: #fdba74 !important; color: #7c2d12 !important; }
-.legend-code.cell-gs   { background: #cbd5e1 !important; color: #0f172a !important; }
-.legend-code.cell-ms   { background: #86efac !important; color: #14532d !important; }
-.legend-code.cell-as   { background: #fda4af !important; color: #881337 !important; }
-.legend-code.cell-rs   { background: #67e8f9 !important; color: #164e63 !important; }
-.legend-code.cell-ls   { background: #c4b5fd !important; color: #3b0764 !important; }
-.legend-code.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
-.legend-code.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
+    .legend-code.cell-duty { background: #7dd3fc !important; color: #0c4a6e !important; }
+    .legend-code.cell-ns   { background: #a5b4fc !important; color: #1e1b4b !important; }
+    .legend-code.cell-ds   { background: #fcd34d !important; color: #78350f !important; }
+    .legend-code.cell-eds  { background: #fdba74 !important; color: #7c2d12 !important; }
+    .legend-code.cell-gs   { background: #cbd5e1 !important; color: #0f172a !important; }
+    .legend-code.cell-ms   { background: #86efac !important; color: #14532d !important; }
+    .legend-code.cell-as   { background: #fda4af !important; color: #881337 !important; }
+    .legend-code.cell-rs   { background: #67e8f9 !important; color: #164e63 !important; }
+    .legend-code.cell-ls   { background: #c4b5fd !important; color: #3b0764 !important; }
+    .legend-code.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
+    .legend-code.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
 
     th.sum-h {
       font-weight: 800;
@@ -600,142 +610,43 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
     tfoot td.sum.total { background: #e2e8f0 !important; }
 
     tr { page-break-inside: avoid; }
-    /* ---------- Shift Legend ---------- */
-    .legend {
-      margin-top: 4mm;
-      padding: 2mm 3mm;
-      border: 1px solid #333;
-      border-radius: 3px;
-      background: #f8fafc;
-      page-break-inside: avoid;
-    }
-    .legend-title {
-      font-size: 8pt;
-      font-weight: 800;
-      letter-spacing: 1px;
-      color: #15803d;
-      text-transform: uppercase;
-      margin-bottom: 1.5mm;
-      border-bottom: 1px solid #cbd5e1;
-      padding-bottom: 1mm;
-    }
-    .legend-items {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 3mm 6mm;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 2mm;
-      font-size: 6.5pt;
-    }
-    .legend-code {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 8mm;
-      height: 4mm;
-      padding: 0 1.5mm;
-      border-radius: 1mm;
-      font-weight: 800;
-      font-size: 6pt;
-      color: #111;
-      border: 1px solid #cbd5e1;
-    }
-    .legend-text {
-      color: #111;
-      font-size: 7.5pt;
-    }
-    .legend-text strong {
-      font-weight: 700;
-    }
-
-    /* ---------- Shift Legend (inside thead) ---------- */
-.legend-row td.legend-cell {
-  padding: 2mm 3mm;
-  background: #f8fafc;
-  border: 1px solid #111;
-  border-bottom: 2px solid #15803d;
-}
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2mm 5mm;
-  text-align: left;
-}
-.legend-title {
-  font-size: 8pt;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: #15803d;
-  text-transform: uppercase;
-  margin-right: 2mm;
-}
-.legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 1.5mm;
-  font-size: 7.5pt;
-}
-.legend-code {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 10mm;
-  height: 5mm;
-  padding: 0 1.5mm;
-  border-radius: 1mm;
-  font-weight: 800;
-  font-size: 7pt;
-  color: #111;
-  border: 1px solid #cbd5e1;
-}
-.legend-text {
-  color: #111;
-}
 
     /* ---------- Signatures ---------- */
-.signatures {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12mm;
-  margin-top: 6mm;
-  page-break-inside: avoid;
-}
-.sig {
-  text-align: left;
-}
-.sig .label-top {
-  font-size: 9pt;
-  color: #111;
-  margin-bottom: 0;
-  white-space: nowrap;
-}
-.sig .sign-space {
-  height: 22px;
-}
-.sig .name {
-  font-weight: 800;
-  font-size: 9pt;
-  text-transform: uppercase;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-  color: #111;
-  display: block;
-  line-height: 1.2;
-  white-space: normal;
-  word-break: keep-all;
-}
-.sig .title {
-  font-size: 8pt;
-  color: #111;
-  margin-top: 2px;
-  font-weight: 500;
-  white-space: nowrap;
-}
+    .signatures {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12mm;
+      margin-top: 6mm;
+      page-break-inside: avoid;
+    }
+    .sig { text-align: left; }
+    .sig .label-top {
+      font-size: 9pt;
+      color: #111;
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+    .sig .sign-space { height: 22px; }
+    .sig .name {
+      font-weight: 800;
+      font-size: 9pt;
+      text-transform: uppercase;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-thickness: 1px;
+      color: #111;
+      display: block;
+      line-height: 1.2;
+      white-space: normal;
+      word-break: keep-all;
+    }
+    .sig .title {
+      font-size: 8pt;
+      color: #111;
+      margin-top: 2px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
 
     @page {
       size: 13in 8.5in;
@@ -753,7 +664,7 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
       <img src="${bannerFor(deptLabel, isAllDepts)}" alt="${deptLabel}" />
     </div>
 
-        <div class="infobar">
+    <div class="infobar">
       <div class="month-title">${months[month - 1]} ${year}</div>
 
       <div class="legend-inline">
@@ -793,7 +704,7 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
         <col style="width:7%" />
         <col style="width:7%" />
       </colgroup>
-             <thead>
+      <thead>
         <tr>
           <th class="num-h">#</th>
           <th class="name-h">NAME</th>
@@ -818,16 +729,15 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
       </tfoot>
     </table>
 
-    </tfoot>
-    </table>
-
-
-        <div class="signatures">
+    <div class="signatures">
       <div class="sig">
         <div class="label-top">Prepared by:</div>
         <div class="sign-space"></div>
-        <div class="name">LORRAINE JANE L. DUNKEN</div>
-        <div class="title">OIC-Manager</div>
+        ${prepared
+          ? `<div class="name">${prepared.name}</div>
+             <div class="title">${prepared.title}</div>`
+          : `<div class="name">&nbsp;</div>
+             <div class="title">&nbsp;</div>`}
       </div>
       <div class="sig">
         <div class="label-top">Checked by:</div>
@@ -842,7 +752,6 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
         <div class="title">Medical Director</div>
       </div>
     </div>
-
   </div>
 </body>
 </html>`;
@@ -915,7 +824,6 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
   const filledCells = stats.AM + stats.PM + stats.D + stats.OFF;
   const emptyCells = totalCells - filledCells;
 
-  // Is the currently viewed month the current calendar month?
   const isCurrentMonth = month === todayMonth && year === todayYear;
   const isPrevMonth =
     !isCurrentMonth &&
@@ -1067,71 +975,69 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
       )}
 
       {/* Clear confirmation modal */}
-{confirmClear && (
-  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-    {/* Backdrop */}
-    <div
-      className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-      onClick={() => setConfirmClear(false)}
-    />
+      {confirmClear && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            onClick={() => setConfirmClear(false)}
+          />
 
-    {/* Dialog */}
-    <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 overflow-hidden">
-      <div className="p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-full bg-rose-50 ring-1 ring-rose-100 grid place-items-center shrink-0">
-            <svg
-              width="22" height="22" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" strokeWidth="2.5"
-              strokeLinecap="round" strokeLinejoin="round"
-              className="text-rose-600"
-            >
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-          </div>
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-rose-50 ring-1 ring-rose-100 grid place-items-center shrink-0">
+                  <svg
+                    width="22" height="22" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" strokeWidth="2.5"
+                    strokeLinecap="round" strokeLinejoin="round"
+                    className="text-rose-600"
+                  >
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </div>
 
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-slate-800">
-              Clear this schedule?
-            </h3>
-            <p className="text-sm text-slate-500 mt-1">
-              You're about to clear all shifts for{" "}
-              <strong className="text-slate-700">{dept}</strong> on{" "}
-              <strong className="text-slate-700">
-                {months[month - 1]} {year}
-              </strong>{" "}
-              ({half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`}).
-            </p>
-            <p className="text-xs text-rose-600 font-medium mt-2">
-              This cannot be undone.
-            </p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-semibold text-slate-800">
+                    Clear this schedule?
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1">
+                    You're about to clear all shifts for{" "}
+                    <strong className="text-slate-700">{dept}</strong> on{" "}
+                    <strong className="text-slate-700">
+                      {months[month - 1]} {year}
+                    </strong>{" "}
+                    ({half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`}).
+                  </p>
+                  <p className="text-xs text-rose-600 font-medium mt-2">
+                    This cannot be undone.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setConfirmClear(false)}
+                className="px-4 py-2 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-100 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmClearHalf}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-rose-600 rounded-xl hover:bg-rose-700 active:scale-95 shadow-sm shadow-rose-200 transition"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                </svg>
+                Yes, clear schedule
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
-        <button
-          onClick={() => setConfirmClear(false)}
-          className="px-4 py-2 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-100 transition"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={confirmClearHalf}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-rose-600 rounded-xl hover:bg-rose-700 active:scale-95 shadow-sm shadow-rose-200 transition"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-          </svg>
-          Yes, clear schedule
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 }
@@ -1256,9 +1162,6 @@ function DepartmentDropdown({ value, onChange }) {
           })}
         </div>
       )}
-
-
-      
     </div>
   );
 }
@@ -1273,14 +1176,5 @@ function StatCard({ label, value }) {
         <div className="text-2xl font-bold text-slate-800">{value}</div>
       </div>
     </div>
-  );
-}
-
-function LegendChip({ color, label }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className={`w-3.5 h-3.5 rounded ${color}`} />
-      {label}
-    </span>
   );
 }

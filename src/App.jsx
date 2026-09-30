@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
-import { getMyProfile, ROLE_LABELS, canSeeEmployees } from "./lib/auth";
+import { getMyProfile, ROLE_LABELS } from "./lib/auth";
 import LoginPage from "./pages/LoginPage";
 import EmployeesPage from "./pages/EmployeesPage";
 import SchedulerPage from "./pages/SchedulerPage";
@@ -86,18 +86,14 @@ export default function App() {
   }
 
   const role = profile.role;
-  const showEmployees = canSeeEmployees(role);
 
-  // Guard: if role can't see Employees, force scheduler
-  const effectivePage =
-    !showEmployees && page === "employees" ? "scheduler" : page;
+// Everyone can see both pages now.
+const effectivePage = page;
 
-  const navItems = [
-    ...(showEmployees
-      ? [{ id: "employees", label: "Employees", icon: "👥" }]
-      : []),
-    { id: "scheduler", label: "Scheduler", icon: "📅" },
-  ];
+const navItems = [
+  { id: "employees", label: "Employees", icon: "👥" },
+  { id: "scheduler", label: "Scheduler", icon: "📅" },
+];
 
   return (
     <div className="min-h-screen flex bg-slate-50">

@@ -34,7 +34,3 @@ export function canManageEmployees(role) {
 export function canEditSchedules(role) {
   return role === "super_admin" || role === "admin";
 }
-
-export function canSeeEmployees(role) {
-  return role === "super_admin" || role === "admin";
-}
