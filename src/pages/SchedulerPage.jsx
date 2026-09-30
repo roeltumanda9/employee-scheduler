@@ -52,6 +52,9 @@ export default function SchedulerPage({ role }) {
   }
 
   // --- State ---
+
+  const [confirmClear, setConfirmClear] = useState(false);
+
   const [month, setMonth] = useState(() => {
     const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
     const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
@@ -190,39 +193,41 @@ export default function SchedulerPage({ role }) {
     setSchedules((prev) => [...prev, data]);
   }
 
-  async function clearHalf() {
-    if (isAllDepts || !canEdit) return;
+  // Opens the modern confirm modal
+function askClearHalf() {
+  if (isAllDepts || !canEdit) return;
+  const empIds = visibleEmployees.map((e) => e.id);
+  if (empIds.length === 0 || days.length === 0) return;
+  setConfirmClear(true);
+}
 
-    const empIds = visibleEmployees.map((e) => e.id);
-    if (empIds.length === 0 || days.length === 0) return;
+// Actually clears once the user confirms
+async function confirmClearHalf() {
+  setConfirmClear(false);
 
-    const ok = window.confirm(
-      `Clear all shifts for ${dept} on ${months[month - 1]} ${
-        half === 1 ? "1–15" : `16–${lastDay}`
-      }?\n\nThis cannot be undone.`
-    );
-    if (!ok) return;
+  const empIds = visibleEmployees.map((e) => e.id);
+  if (empIds.length === 0 || days.length === 0) return;
 
-    const firstIso = days[0].iso;
-    const lastIso = days[days.length - 1].iso;
+  const firstIso = days[0].iso;
+  const lastIso = days[days.length - 1].iso;
 
-    const { error } = await supabase
-      .from("schedules")
-      .delete()
-      .in("employee_id", empIds)
-      .gte("date", firstIso)
-      .lte("date", lastIso);
+  const { error } = await supabase
+    .from("schedules")
+    .delete()
+    .in("employee_id", empIds)
+    .gte("date", firstIso)
+    .lte("date", lastIso);
 
-    if (error) return alert(error.message);
+  if (error) return alert(error.message);
 
-    const empIdSet = new Set(empIds);
-    const daySet = new Set(days.map((d) => d.iso));
-    setSchedules((prev) =>
-      prev.filter(
-        (s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))
-      )
-    );
-  }
+  const empIdSet = new Set(empIds);
+  const daySet = new Set(days.map((d) => d.iso));
+  setSchedules((prev) =>
+    prev.filter(
+      (s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))
+    )
+  );
+}
 
   function changeMonth(delta) {
     let m = month + delta;
@@ -946,7 +951,7 @@ td.cell.total { background: #e8f5e9 !important; color: #166534 !important; }
 
           {canEdit && (
             <button
-              onClick={clearHalf}
+              onClick={askClearHalf}
               disabled={isAllDepts || visibleEmployees.length === 0}
               className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
               title={isAllDepts ? "Not available in preview mode" : "Clear this half"}
@@ -1166,6 +1171,75 @@ function DepartmentDropdown({ value, onChange }) {
           })}
         </div>
       )}
+
+
+      {/* Clear confirmation modal */}
+{confirmClear && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    {/* Backdrop */}
+    <div
+      className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+      onClick={() => setConfirmClear(false)}
+    />
+
+    {/* Dialog */}
+    <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-full bg-rose-50 ring-1 ring-rose-100 grid place-items-center shrink-0">
+            <svg
+              width="22" height="22" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" strokeWidth="2.5"
+              strokeLinecap="round" strokeLinejoin="round"
+              className="text-rose-600"
+            >
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-semibold text-slate-800">
+              Clear this schedule?
+            </h3>
+            <p className="text-sm text-slate-500 mt-1">
+              You're about to clear all shifts for{" "}
+              <strong className="text-slate-700">{dept}</strong> on{" "}
+              <strong className="text-slate-700">
+                {months[month - 1]} {year}
+              </strong>{" "}
+              ({half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`}).
+            </p>
+            <p className="text-xs text-rose-600 font-medium mt-2">
+              This cannot be undone.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+        <button
+          onClick={() => setConfirmClear(false)}
+          className="px-4 py-2 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-100 transition"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={confirmClearHalf}
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-rose-600 rounded-xl hover:bg-rose-700 active:scale-95 shadow-sm shadow-rose-200 transition"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+          </svg>
+          Yes, clear schedule
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
