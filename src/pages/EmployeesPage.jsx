@@ -123,7 +123,7 @@ export default function EmployeesPage({ role }) {
         />
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200">
         {/* Header */}
         <div className="px-4 sm:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -185,7 +185,7 @@ export default function EmployeesPage({ role }) {
         </div>
 
         {/* Desktop table */}
-        <div className="hidden md:block overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto rounded-b-2xl">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
               <tr className="bg-slate-50 text-slate-500 text-left text-xs uppercase tracking-wider">
@@ -262,7 +262,7 @@ export default function EmployeesPage({ role }) {
         </div>
 
         {/* Mobile cards */}
-        <div className="md:hidden divide-y divide-slate-100">
+        <div className="md:hidden divide-y divide-slate-100 rounded-b-2xl overflow-hidden">
           {loading && (
             <div className="px-4 py-12 text-center">
               <div className="inline-block w-5 h-5 border-2 border-slate-300 border-t-green-600 rounded-full animate-spin" />
