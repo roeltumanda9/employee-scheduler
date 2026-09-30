@@ -1,7 +1,7 @@
 export const DEPARTMENTS = [
   "Amysthetic",
   "H Hotel",
-  "Grocery / Pharmacy",
+  "JA Grocery / Pharmacy",
   "Wellness",
   "Juhanju",
   "HMC",

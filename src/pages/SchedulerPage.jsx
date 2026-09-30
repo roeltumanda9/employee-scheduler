@@ -7,10 +7,14 @@ import { STATUS_MAP, STATUSES_BY_DEPARTMENT, resolveStatus } from "../lib/status
 
 
 const DEPT_BANNERS = {
-  "Amysthetic Department": "/logo-banner-amystethic.png",
-  "Admin Department":      "/logo-banner-admin.png",
-  "Ja Grocery & Pharmacy": "/logo-banner-jagrocery.png",
-  "H Hotel":               "/logo-banner-hhotel.png",
+  "Amysthetic":          "/logo-banner-amystethic.png",
+  "H Hotel":             "/logo-banner-hhotel.png",
+  "JA Grocery / Pharmacy":  "/logo-banner-jagrocery.png",
+  "Wellness":            "/logo-banner-wellness.png",
+  "Juhanju":             "/logo-banner-juhanju.png",
+  "HMC":                 "/logo-banner-hmc.png",
+  "HMC Laboratory":      "/logo-banner-hmc-lab.png",
+  "Hofitea":             "/logo-banner-hofitea.png",
 };
 
 const DEFAULT_BANNER = "/logo-banner.png";
