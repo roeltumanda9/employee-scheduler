@@ -4,6 +4,8 @@ import { getMyProfile, ROLE_LABELS } from "./lib/auth";
 import LoginPage from "./pages/LoginPage";
 import EmployeesPage from "./pages/EmployeesPage";
 import SchedulerPage from "./pages/SchedulerPage";
+import { useAutoLogout } from "./lib/useAutoLogout";
+import IdleWarningModal from "./components/IdleWarningModal";
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -15,6 +17,9 @@ export default function App() {
     const saved = localStorage.getItem("hmc_page");
     return saved === "scheduler" || saved === "employees" ? saved : "employees";
   });
+
+  // Auto-logout after 30 minutes of inactivity (only when signed in)
+const { warning: idleWarning, staySignedIn } = useAutoLogout(!!session);
 
   // --- Auth bootstrap ---
   useEffect(() => {
@@ -241,6 +246,10 @@ export default function App() {
           )}
         </div>
       </main>
+
+      <IdleWarningModal open={idleWarning} onStaySignedIn={staySignedIn} />
+
+      
     </div>
   );
 }
