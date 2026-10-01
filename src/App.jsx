@@ -120,13 +120,13 @@ const { warning: idleWarning, staySignedIn } = useAutoLogout(!!session);
             <img
               src="/logo.png"
               alt="Hofilena Medical Centre"
-              className="w-16 h-16 rounded-full bg-white p-0.5 shrink-0 ring-1 ring-green-100"
+              className="w-50 h-50 rounded-full bg-white p-0.5 shrink-0 ring-1 ring-green-100"
             />
             <div className="min-w-0 w-full">
-              <h1 className="text-sm font-bold tracking-tight leading-tight text-green-900">
-                Hofilena Medical Centre
+              <h1 className="text-xl font-bold tracking-tight leading-tight text-green-900">
+                Hofileña Medical Centrum
               </h1>
-              <p className="text-[11px] text-green-700/70 leading-tight mt-0.5">
+              <p className="text-[20px] text-green-700/70 leading-tight mt-0.5">
                 Employee Scheduler
               </p>
             </div>
