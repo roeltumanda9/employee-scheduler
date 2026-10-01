@@ -12,7 +12,7 @@ export const STATUSES = [
   timeByDepartment: {
     "Amysthetic":     "10:00 AM – 7:00 PM",
     "Wellness":       "8:00 AM – 5:00 PM",
-    "johanju":        "9:00 AM – 6:00 PM",
+    "Johanju":        "9:00 AM – 6:00 PM",
     "HMC":            "8:00 AM – 5:00 PM",
     "HMC Laboratory": "8:00 AM – 5:00 PM",
   },
@@ -49,7 +49,7 @@ export const STATUSES_BY_DEPARTMENT = {
   "H Hotel":            ["NS", "DS", "EDS", "GS", "OFF"],
   "JA Grocery / Pharmacy": ["MS", "AS", "OFF"],
   "Wellness":           ["DUTY", "OFF"],
-  "johanju":            ["DUTY", "OFF"],
+  "Johanju":            ["DUTY", "OFF"],
   "HMC":                ["DUTY", "OFF"],
   "HMC Laboratory":     ["DUTY", "OFF"],
   "Hofitea":            ["RS", "LS", "ES", "OFF"],
