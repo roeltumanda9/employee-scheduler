@@ -98,7 +98,7 @@ export const STATUSES_BY_DEPARTMENT = {
   "JA Grocery / Pharmacy": ["MS", "AS", "OFF"],
   Wellness: ["DUTY", "OFF"],
   Johanju: ["DUTY", "OFF"],
-  HMC: ["DUTY", "OFF"],
+  HMC: ["DUTY", "AS", "OFF"],
   "HMC Laboratory": ["DUTY", "OFF"],
   Hofitea: ["RS", "LS", "ES", "OFF"],
 };
