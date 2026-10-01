@@ -36,9 +36,7 @@ async function getNextEmployeeNumber() {
 
   if (error || !data) return "1001";
 
-  const nums = data
-    .map((r) => parseInt(r.number, 10))
-    .filter((n) => !isNaN(n));
+  const nums = data.map((r) => parseInt(r.number, 10)).filter((n) => !isNaN(n));
 
   if (nums.length === 0) return "1001";
   const max = Math.max(...nums);
@@ -165,7 +163,16 @@ export default function EmployeeForm({ open, editing, onDone, onCancel }) {
             className="w-8 h-8 grid place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
             title="Close"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -174,8 +181,6 @@ export default function EmployeeForm({ open, editing, onDone, onCancel }) {
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="p-4 sm:p-6 overflow-y-auto space-y-5">
-            
-
             {/* Name row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Field label="First name">
@@ -183,7 +188,9 @@ export default function EmployeeForm({ open, editing, onDone, onCancel }) {
                   required
                   autoFocus
                   value={form.first_name}
-                  onChange={(e) => update("first_name", formatName(e.target.value))}
+                  onChange={(e) =>
+                    update("first_name", formatName(e.target.value))
+                  }
                   placeholder="e.g. JUAN"
                   className="uppercase w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
                 />
@@ -192,7 +199,9 @@ export default function EmployeeForm({ open, editing, onDone, onCancel }) {
               <Field label="Middle name">
                 <input
                   value={form.middle_name}
-                  onChange={(e) => update("middle_name", formatName(e.target.value))}
+                  onChange={(e) =>
+                    update("middle_name", formatName(e.target.value))
+                  }
                   placeholder="e.g. SANTOS"
                   className="uppercase w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
                 />
@@ -202,7 +211,9 @@ export default function EmployeeForm({ open, editing, onDone, onCancel }) {
                 <input
                   required
                   value={form.last_name}
-                  onChange={(e) => update("last_name", formatName(e.target.value))}
+                  onChange={(e) =>
+                    update("last_name", formatName(e.target.value))
+                  }
                   placeholder="e.g. DELA CRUZ"
                   className="uppercase w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition"
                 />

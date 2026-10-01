@@ -10,14 +10,14 @@ import {
 } from "../lib/statuses";
 
 const DEPT_BANNERS = {
-  "Amysthetic":            "/logo-banner-amystethic.png",
-  "H Hotel":               "/logo-banner-hhotel.png",
+  Amysthetic: "/logo-banner-amystethic.png",
+  "H Hotel": "/logo-banner-hhotel.png",
   "JA Grocery / Pharmacy": "/logo-banner-jagrocery.png",
-  "Wellness":              "/logo-banner-wellness.png",
-  "Johanju":               "/logo-banner-johanju.png",
-  "HMC":                   "/logo-banner.png",
-  "HMC Laboratory":        "/logo-banner.png",
-  "Hofitea":               "/logo-banner-hofitea.png",
+  Wellness: "/logo-banner-wellness.png",
+  Johanju: "/logo-banner-johanju.png",
+  HMC: "/logo-banner.png",
+  "HMC Laboratory": "/logo-banner.png",
+  Hofitea: "/logo-banner-hofitea.png",
 };
 
 const DEFAULT_BANNER = "/logo-banner.png";
@@ -29,14 +29,17 @@ function bannerFor(deptLabel, isAll) {
 
 // Per-department "Prepared by" signatories.
 const PREPARED_BY = {
-  "Amysthetic":            { name: "VICARH-JENZEN CARDENAS",  title: "Info Clerk" },
-  "H Hotel":               { name: "LORRAINE JANE L. DUNKEN", title: "OIC-Manager" },
-  "JA Grocery / Pharmacy": { name: "BERNARD A. TABANAO",      title: "Pharmacist" },
-  "Wellness":              { name: "VALERIE MARIE CALLENERO", title: "Human Resource Manager" },
-  "Johanju":               { name: "BERNARD A. TABANAO",      title: "Pharmacist" },
-  "HMC":                   { name: "BERNARD A. TABANAO",      title: "Pharmacist" },
-  "HMC Laboratory":        { name: "VALERY AYAWON",           title: "MedTech" },
-  "Hofitea":               { name: "BERNARD A. TABANAO",      title: "Pharmacist" },
+  Amysthetic: { name: "VICARH-JENZEN CARDENAS", title: "Info Clerk" },
+  "H Hotel": { name: "LORRAINE JANE L. DUNKEN", title: "OIC-Manager" },
+  "JA Grocery / Pharmacy": { name: "BERNARD A. TABANAO", title: "Pharmacist" },
+  Wellness: {
+    name: "VALERIE MARIE CALLENERO",
+    title: "Human Resource Manager",
+  },
+  Johanju: { name: "BERNARD A. TABANAO", title: "Pharmacist" },
+  HMC: { name: "BERNARD A. TABANAO", title: "Pharmacist" },
+  "HMC Laboratory": { name: "VALERY AYAWON", title: "MedTech" },
+  Hofitea: { name: "BERNARD A. TABANAO", title: "Pharmacist" },
 };
 
 export default function SchedulerPage({ role }) {
@@ -50,8 +53,14 @@ export default function SchedulerPage({ role }) {
   function monthOffset(delta) {
     let m = todayMonth + delta;
     let y = todayYear;
-    if (m < 1) { m = 12; y -= 1; }
-    if (m > 12) { m = 1; y += 1; }
+    if (m < 1) {
+      m = 12;
+      y -= 1;
+    }
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
     return { year: y, month: m };
   }
 
@@ -61,8 +70,7 @@ export default function SchedulerPage({ role }) {
   function isAllowed(y, m) {
     const key = y * 100 + m;
     return (
-      key >= PREV.year * 100 + PREV.month &&
-      key <= NEXT.year * 100 + NEXT.month
+      key >= PREV.year * 100 + PREV.month && key <= NEXT.year * 100 + NEXT.month
     );
   }
 
@@ -73,8 +81,10 @@ export default function SchedulerPage({ role }) {
     const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
     const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
     if (
-      savedM >= 1 && savedM <= 12 &&
-      savedY >= 2000 && savedY <= 2100 &&
+      savedM >= 1 &&
+      savedM <= 12 &&
+      savedY >= 2000 &&
+      savedY <= 2100 &&
       isAllowed(savedY, savedM)
     ) {
       return savedM;
@@ -86,8 +96,10 @@ export default function SchedulerPage({ role }) {
     const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
     const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
     if (
-      savedM >= 1 && savedM <= 12 &&
-      savedY >= 2000 && savedY <= 2100 &&
+      savedM >= 1 &&
+      savedM <= 12 &&
+      savedY >= 2000 &&
+      savedY <= 2100 &&
       isAllowed(savedY, savedM)
     ) {
       return savedY;
@@ -118,8 +130,18 @@ export default function SchedulerPage({ role }) {
 
   const lastDay = allDays.length ? allDays[allDays.length - 1].day : 30;
   const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const isAllDepts = dept === "all";
@@ -188,7 +210,7 @@ export default function SchedulerPage({ role }) {
     if (isAllDepts || !canEdit) return;
 
     const existing = schedules.find(
-      (s) => s.employee_id === employeeId && s.date === iso
+      (s) => s.employee_id === employeeId && s.date === iso,
     );
 
     if (!status) {
@@ -211,7 +233,7 @@ export default function SchedulerPage({ role }) {
         .single();
       if (error) return alert(error.message);
       setSchedules((prev) =>
-        prev.map((s) => (s.id === existing.id ? data : s))
+        prev.map((s) => (s.id === existing.id ? data : s)),
       );
       return;
     }
@@ -255,17 +277,21 @@ export default function SchedulerPage({ role }) {
     const empIdSet = new Set(empIds);
     const daySet = new Set(days.map((d) => d.iso));
     setSchedules((prev) =>
-      prev.filter(
-        (s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))
-      )
+      prev.filter((s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))),
     );
   }
 
   function changeMonth(delta) {
     let m = month + delta;
     let y = year;
-    if (m < 1) { m = 12; y -= 1; }
-    if (m > 12) { m = 1; y += 1; }
+    if (m < 1) {
+      m = 12;
+      y -= 1;
+    }
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
     if (!isAllowed(y, m)) return;
     setMonth(m);
     setYear(y);
@@ -296,7 +322,7 @@ export default function SchedulerPage({ role }) {
         <th class="day">
           <div class="weekday">${d.weekday.toUpperCase()}</div>
           <div class="daynum">${d.day}</div>
-        </th>`
+        </th>`,
       )
       .join("");
 
@@ -673,14 +699,12 @@ export default function SchedulerPage({ role }) {
             (s) => `
           <span class="legend-item">
             <span class="legend-code ${
-              s.code === "DUTY"
-                ? "cell-duty"
-                : "cell-" + s.code.toLowerCase()
+              s.code === "DUTY" ? "cell-duty" : "cell-" + s.code.toLowerCase()
             }">${s.code}</span>
             <span class="legend-text">
               ${s.label}${s.time ? ` — ${s.time}` : ""}
             </span>
-          </span>`
+          </span>`,
           )
           .join("")}
       </div>
@@ -733,11 +757,13 @@ export default function SchedulerPage({ role }) {
       <div class="sig">
         <div class="label-top">Prepared by:</div>
         <div class="sign-space"></div>
-        ${prepared
-          ? `<div class="name">${prepared.name}</div>
+        ${
+          prepared
+            ? `<div class="name">${prepared.name}</div>
              <div class="title">${prepared.title}</div>`
-          : `<div class="name">&nbsp;</div>
-             <div class="title">&nbsp;</div>`}
+            : `<div class="name">&nbsp;</div>
+             <div class="title">&nbsp;</div>`
+        }
       </div>
       <div class="sig">
         <div class="label-top">Checked by:</div>
@@ -779,8 +805,8 @@ export default function SchedulerPage({ role }) {
             : new Promise((res) => {
                 img.onload = res;
                 img.onerror = res;
-              })
-        )
+              }),
+        ),
       );
 
     const ready = () => {
@@ -811,7 +837,7 @@ export default function SchedulerPage({ role }) {
 
   const visibleIds = useMemo(
     () => new Set(visibleEmployees.map((e) => e.id)),
-    [visibleEmployees]
+    [visibleEmployees],
   );
   const halfDaySet = new Set(days.map((d) => d.iso));
   const stats = { AM: 0, PM: 0, D: 0, OFF: 0 };
@@ -826,11 +852,9 @@ export default function SchedulerPage({ role }) {
 
   const isCurrentMonth = month === todayMonth && year === todayYear;
   const isPrevMonth =
-    !isCurrentMonth &&
-    (year * 100 + month) < (todayYear * 100 + todayMonth);
+    !isCurrentMonth && year * 100 + month < todayYear * 100 + todayMonth;
   const isNextMonth =
-    !isCurrentMonth &&
-    (year * 100 + month) > (todayYear * 100 + todayMonth);
+    !isCurrentMonth && year * 100 + month > todayYear * 100 + todayMonth;
 
   return (
     <div className="space-y-5">
@@ -841,9 +865,20 @@ export default function SchedulerPage({ role }) {
               onClick={() => changeMonth(-1)}
               disabled={!canGoPrev()}
               className="w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-              title={canGoPrev() ? "Previous month" : "No earlier months available"}
+              title={
+                canGoPrev() ? "Previous month" : "No earlier months available"
+              }
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
@@ -852,8 +887,8 @@ export default function SchedulerPage({ role }) {
                 {isCurrentMonth
                   ? "Current Month"
                   : isPrevMonth
-                  ? "Previous Month"
-                  : "Next Month"}
+                    ? "Previous Month"
+                    : "Next Month"}
               </div>
               <div className="text-base font-bold text-slate-800">
                 {months[month - 1]} {year}
@@ -865,7 +900,16 @@ export default function SchedulerPage({ role }) {
               className="w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
               title={canGoNext() ? "Next month" : "No later months available"}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="9 18 15 12 9 6" />
               </svg>
             </button>
@@ -880,9 +924,20 @@ export default function SchedulerPage({ role }) {
               onClick={askClearHalf}
               disabled={isAllDepts || visibleEmployees.length === 0}
               className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
-              title={isAllDepts ? "Not available in preview mode" : "Clear this half"}
+              title={
+                isAllDepts ? "Not available in preview mode" : "Clear this half"
+              }
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                 <path d="M10 11v6" />
@@ -898,7 +953,16 @@ export default function SchedulerPage({ role }) {
             className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-green-200 text-green-700 bg-white hover:bg-green-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
             title="Print this schedule"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="6 9 6 2 18 2 18 9" />
               <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
               <rect x="6" y="14" width="12" height="8" />
@@ -934,7 +998,16 @@ export default function SchedulerPage({ role }) {
           <div className="ml-auto flex items-center gap-3">
             {(isAllDepts || !canEdit) && (
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-green-700 bg-green-50 ring-1 ring-green-100 rounded-full px-2.5 py-1">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
@@ -987,9 +1060,14 @@ export default function SchedulerPage({ role }) {
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-rose-50 ring-1 ring-rose-100 grid place-items-center shrink-0">
                   <svg
-                    width="22" height="22" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" strokeWidth="2.5"
-                    strokeLinecap="round" strokeLinejoin="round"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     className="text-rose-600"
                   >
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
@@ -1008,7 +1086,11 @@ export default function SchedulerPage({ role }) {
                     <strong className="text-slate-700">
                       {months[month - 1]} {year}
                     </strong>{" "}
-                    ({half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`}).
+                    (
+                    {half === 1
+                      ? "1st Half (1–15)"
+                      : `2nd Half (16–${lastDay})`}
+                    ).
                   </p>
                   <p className="text-xs text-rose-600 font-medium mt-2">
                     This cannot be undone.
@@ -1028,7 +1110,16 @@ export default function SchedulerPage({ role }) {
                 onClick={confirmClearHalf}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-rose-600 rounded-xl hover:bg-rose-700 active:scale-95 shadow-sm shadow-rose-200 transition"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                 </svg>
@@ -1089,15 +1180,22 @@ function DepartmentDropdown({ value, onChange }) {
         <span className="flex items-center gap-2 min-w-0">
           <svg
             className={isAll ? "text-green-600" : "text-slate-400"}
-            width="14" height="14" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
             <path d="M3 21h18" />
             <path d="M5 21V7l7-4 7 4v14" />
             <path d="M9 21v-6h6v6" />
           </svg>
-          <span className={`truncate ${isAll ? "text-green-700 font-semibold" : "text-slate-800"}`}>
+          <span
+            className={`truncate ${isAll ? "text-green-700 font-semibold" : "text-slate-800"}`}
+          >
             {label}
           </span>
           {isAll && (
@@ -1109,9 +1207,14 @@ function DepartmentDropdown({ value, onChange }) {
 
         <svg
           className={`text-slate-400 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-          width="14" height="14" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" strokeWidth="2.5"
-          strokeLinecap="round" strokeLinejoin="round"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -1149,8 +1252,12 @@ function DepartmentDropdown({ value, onChange }) {
                 {active && (
                   <svg
                     className="text-green-600 shrink-0"
-                    width="16" height="16" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" strokeWidth="3"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >

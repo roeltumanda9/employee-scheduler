@@ -7,7 +7,7 @@ export default function PeriodColumn({
   onToggle,
 }) {
   const assignedIds = new Set(
-    schedules.filter((s) => s.period === period).map((s) => s.employee_id)
+    schedules.filter((s) => s.period === period).map((s) => s.employee_id),
   );
 
   return (
@@ -19,9 +19,7 @@ export default function PeriodColumn({
 
       <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
         {employees.length === 0 && (
-          <p className="p-4 text-sm text-slate-500">
-            Add employees first.
-          </p>
+          <p className="p-4 text-sm text-slate-500">Add employees first.</p>
         )}
         {employees.map((e) => {
           const checked = assignedIds.has(e.id);

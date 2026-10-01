@@ -1,5 +1,9 @@
 import { useState, useRef } from "react";
-import { STATUSES, STATUS_MAP, statusesForDepartmentResolved } from "../lib/statuses";
+import {
+  STATUSES,
+  STATUS_MAP,
+  statusesForDepartmentResolved,
+} from "../lib/statuses";
 
 // Fixed large sizes for readability
 const SIZES = {
@@ -39,21 +43,21 @@ export default function ScheduleGrid({
     let count = 0;
     for (const emp of employees) {
       const st = lookup[`${emp.id}|${d.iso}`]?.status;
-if (st && st !== "OFF") count++;
+      if (st && st !== "OFF") count++;
     }
     dailyManpower[d.iso] = count;
   }
 
   let grandPresent = 0;
-let grandOff = 0;
-for (const emp of employees) {
-  for (const d of days) {
-    const st = lookup[`${emp.id}|${d.iso}`]?.status;
-    if (st && st !== "OFF") grandPresent++;
-else if (st === "OFF") grandOff++;
+  let grandOff = 0;
+  for (const emp of employees) {
+    for (const d of days) {
+      const st = lookup[`${emp.id}|${d.iso}`]?.status;
+      if (st && st !== "OFF") grandPresent++;
+      else if (st === "OFF") grandOff++;
+    }
   }
-}
-const grandTotal = grandPresent;  
+  const grandTotal = grandPresent;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 overflow-hidden">
@@ -108,38 +112,42 @@ const grandTotal = grandPresent;
               })}
 
               <th className="sticky z-20 bg-emerald-50 border-b border-r border-slate-200 px-1 py-2 text-center">
-  <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-bold leading-tight">
-    Physical<br />Present
-  </div>
-</th>
-<th className="sticky z-20 bg-rose-50 border-b border-r border-slate-200 px-1 py-2 text-center">
-  <div className="text-[10px] uppercase tracking-wider text-rose-700 font-bold leading-tight">
-  Physical<br />Off
-</div>
-</th>
-<th className="sticky right-0 z-20 bg-slate-100 border-b border-slate-200 px-1 py-2 text-center">
-  <div className="text-[10px] uppercase tracking-wider text-slate-700 font-bold leading-tight">
-    Total<br />Working Days
-  </div>
-</th>
+                <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-bold leading-tight">
+                  Physical
+                  <br />
+                  Present
+                </div>
+              </th>
+              <th className="sticky z-20 bg-rose-50 border-b border-r border-slate-200 px-1 py-2 text-center">
+                <div className="text-[10px] uppercase tracking-wider text-rose-700 font-bold leading-tight">
+                  Physical
+                  <br />
+                  Off
+                </div>
+              </th>
+              <th className="sticky right-0 z-20 bg-slate-100 border-b border-slate-200 px-1 py-2 text-center">
+                <div className="text-[10px] uppercase tracking-wider text-slate-700 font-bold leading-tight">
+                  Total
+                  <br />
+                  Working Days
+                </div>
+              </th>
             </tr>
           </thead>
 
           <tbody>
             {employees.map((emp, idx) => {
               let present = 0;
-let off = 0;
-for (const d of days) {
-  const st = lookup[`${emp.id}|${d.iso}`]?.status;
-  if (st && st !== "OFF") present++;
-else if (st === "OFF") off++;
-}
-const total = present; 
+              let off = 0;
+              for (const d of days) {
+                const st = lookup[`${emp.id}|${d.iso}`]?.status;
+                if (st && st !== "OFF") present++;
+                else if (st === "OFF") off++;
+              }
+              const total = present;
 
               const rowBg = idx % 2 ? "bg-slate-50/40" : "bg-white";
-              const hoverBg = readOnly
-                ? ""
-                : "group-hover:bg-green-50/40";
+              const hoverBg = readOnly ? "" : "group-hover:bg-green-50/40";
 
               return (
                 <tr
@@ -184,16 +192,18 @@ const total = present;
                         }`}
                       >
                         <CellButton
-  status={status}
-  isToday={isToday}
-  height={z.cellH}
-  textClass={z.cellText}
-  readOnly={readOnly}
-  statuses={statusesForDepartmentResolved(emp.department)}
-  onChange={(newStatus) =>
-    onSetStatus(emp.id, d.iso, newStatus)
-  }
-/>
+                          status={status}
+                          isToday={isToday}
+                          height={z.cellH}
+                          textClass={z.cellText}
+                          readOnly={readOnly}
+                          statuses={statusesForDepartmentResolved(
+                            emp.department,
+                          )}
+                          onChange={(newStatus) =>
+                            onSetStatus(emp.id, d.iso, newStatus)
+                          }
+                        />
                       </td>
                     );
                   })}
@@ -233,7 +243,16 @@ const total = present;
               <td className="sticky left-0 z-20 bg-gradient-to-r from-green-100 via-green-50 to-transparent border-t-2 border-green-200 border-r border-slate-200 px-3 py-2.5">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-md bg-green-600 text-white grid place-items-center shadow-sm">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                       <circle cx="9" cy="7" r="4" />
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -298,9 +317,7 @@ const total = present;
 /* ---- Summary cell ---- */
 function SummaryNumber({ value, className }) {
   return (
-    <span className={`font-bold ${className}`}>
-      {value > 0 ? value : "—"}
-    </span>
+    <span className={`font-bold ${className}`}>{value > 0 ? value : "—"}</span>
   );
 }
 
@@ -348,8 +365,8 @@ function CellButton({
   const look = current
     ? `${current.classes} shadow-sm`
     : readOnly
-    ? "bg-white text-slate-300"
-    : "bg-white text-slate-300 hover:bg-slate-100 hover:text-slate-500";
+      ? "bg-white text-slate-300"
+      : "bg-white text-slate-300 hover:bg-slate-100 hover:text-slate-500";
 
   return (
     <>
@@ -371,16 +388,16 @@ function CellButton({
       </button>
 
       {!readOnly && pos && (
-  <Popup
-    pos={pos}
-    statuses={statuses}
-    onClose={() => setPos(null)}
-    onPick={(code) => {
-      onChange(code);
-      setPos(null);
-    }}
-  />
-)}
+        <Popup
+          pos={pos}
+          statuses={statuses}
+          onClose={() => setPos(null)}
+          onPick={(code) => {
+            onChange(code);
+            setPos(null);
+          }}
+        />
+      )}
     </>
   );
 }

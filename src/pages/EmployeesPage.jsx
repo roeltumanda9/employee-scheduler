@@ -83,32 +83,32 @@ export default function EmployeesPage({ role }) {
   }
 
   const filtered = useMemo(() => {
-  const q = search.trim().toLowerCase();
-  const result = employees.filter((e) => {
-    if (deptFilter !== "all" && e.department !== deptFilter) return false;
-    if (!q) return true;
-    const haystack = [
-      e.first_name,
-      e.middle_name,
-      e.last_name,
-      e.name,
-      e.number,
-      e.role,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    return haystack.includes(q);
-  });
+    const q = search.trim().toLowerCase();
+    const result = employees.filter((e) => {
+      if (deptFilter !== "all" && e.department !== deptFilter) return false;
+      if (!q) return true;
+      const haystack = [
+        e.first_name,
+        e.middle_name,
+        e.last_name,
+        e.name,
+        e.number,
+        e.role,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    });
 
-  // Sort by department (A–Z), then by name (A–Z)
-  return [...result].sort((a, b) => {
-    if (a.department !== b.department) {
-      return a.department.localeCompare(b.department);
-    }
-    return (a.name || "").localeCompare(b.name || "");
-  });
-}, [employees, search, deptFilter]);
+    // Sort by department (A–Z), then by name (A–Z)
+    return [...result].sort((a, b) => {
+      if (a.department !== b.department) {
+        return a.department.localeCompare(b.department);
+      }
+      return (a.name || "").localeCompare(b.name || "");
+    });
+  }, [employees, search, deptFilter]);
 
   const counts = useMemo(() => {
     const c = { all: employees.length };
@@ -149,9 +149,14 @@ export default function EmployeesPage({ role }) {
             <div className="relative flex-1 sm:flex-initial">
               <svg
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                width="14" height="14" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" strokeWidth="2.5"
-                strokeLinecap="round" strokeLinejoin="round"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -170,7 +175,16 @@ export default function EmployeesPage({ role }) {
                 onClick={openAdd}
                 className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 active:scale-95 shadow-sm shadow-green-200 transition"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
@@ -202,14 +216,19 @@ export default function EmployeesPage({ role }) {
                 <th className="px-6 py-3 font-semibold">Department</th>
                 <th className="px-6 py-3 font-semibold">Role</th>
                 {canManage && (
-                  <th className="px-6 py-3 font-semibold text-right">Actions</th>
+                  <th className="px-6 py-3 font-semibold text-right">
+                    Actions
+                  </th>
                 )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && (
                 <tr>
-                  <td colSpan={canManage ? 5 : 4} className="px-6 py-12 text-center">
+                  <td
+                    colSpan={canManage ? 5 : 4}
+                    className="px-6 py-12 text-center"
+                  >
                     <div className="inline-block w-5 h-5 border-2 border-slate-300 border-t-green-600 rounded-full animate-spin" />
                     <p className="mt-2 text-xs text-slate-500">Loading…</p>
                   </td>
@@ -218,23 +237,26 @@ export default function EmployeesPage({ role }) {
 
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={canManage ? 5 : 4} className="px-6 py-12 text-center">
+                  <td
+                    colSpan={canManage ? 5 : 4}
+                    className="px-6 py-12 text-center"
+                  >
                     <EmptyState employees={employees} />
                   </td>
                 </tr>
               )}
 
               {!loading &&
-  filtered.map((e, index) => {
-    const full = displayName(e);
-    return (
+                filtered.map((e, index) => {
+                  const full = displayName(e);
+                  return (
                     <tr
                       key={e.id}
                       className="hover:bg-green-50/40 transition-colors"
                     >
                       <td className="px-6 py-3 text-slate-600 font-mono text-xs">
-  {index + 1}
-</td>
+                        {index + 1}
+                      </td>
                       <td className="px-6 py-3">
                         <div className="font-medium text-slate-800 truncate uppercase">
                           {full || "—"}
@@ -285,18 +307,18 @@ export default function EmployeesPage({ role }) {
           )}
 
           {!loading &&
-  filtered.map((e, index) => {
-    const full = displayName(e);
-    return (
-      <div key={e.id} className="p-4 space-y-3">
+            filtered.map((e, index) => {
+              const full = displayName(e);
+              return (
+                <div key={e.id} className="p-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-semibold text-slate-800 truncate uppercase">
                         {full || "—"}
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono mt-0.5">
-  #{index + 1}
-</div>
+                        #{index + 1}
+                      </div>
                     </div>
                     <span
                       className={`inline-flex shrink-0 items-center text-[10px] font-medium rounded-full px-2 py-1 ring-1 ${DEPT_BADGE}`}
@@ -399,9 +421,14 @@ function DepartmentFilterDropdown({ value, onChange, counts }) {
         <span className="flex items-center gap-2 min-w-0">
           <svg
             className={isAll ? "text-slate-400" : "text-green-600"}
-            width="14" height="14" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
             <path d="M3 21h18" />
             <path d="M5 21V7l7-4 7 4v14" />
@@ -423,9 +450,14 @@ function DepartmentFilterDropdown({ value, onChange, counts }) {
           className={`text-slate-400 shrink-0 transition-transform ${
             open ? "rotate-180" : ""
           }`}
-          width="14" height="14" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" strokeWidth="2.5"
-          strokeLinecap="round" strokeLinejoin="round"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -456,7 +488,9 @@ function DepartmentFilterDropdown({ value, onChange, counts }) {
                 <span className="flex-1 truncate font-medium">{opt.label}</span>
                 <span
                   className={`text-[10px] font-bold rounded-full px-1.5 py-0.5 shrink-0 ${
-                    active ? "bg-white text-green-700" : "bg-slate-100 text-slate-600"
+                    active
+                      ? "bg-white text-green-700"
+                      : "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {count}
@@ -464,9 +498,14 @@ function DepartmentFilterDropdown({ value, onChange, counts }) {
                 {active && (
                   <svg
                     className="text-green-600 shrink-0"
-                    width="16" height="16" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" strokeWidth="3"
-                    strokeLinecap="round" strokeLinejoin="round"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>

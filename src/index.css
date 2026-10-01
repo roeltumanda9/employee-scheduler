@@ -4,17 +4,20 @@
 
 :root {
   /* Brand colors */
-  --brand-green: #16a34a;        /* darker green for text on white */
+  --brand-green: #16a34a; /* darker green for text on white */
   --brand-green-bright: #22c55e; /* the logo green */
-  --brand-green-dark: #15803d;   /* hover state */
-  --brand-black: #0f172a;        /* near-black for sidebar */
+  --brand-green-dark: #15803d; /* hover state */
+  --brand-black: #0f172a; /* near-black for sidebar */
 }
 
 html {
   font-size: 18px;
 }
 
-button, select, input, a {
+button,
+select,
+input,
+a {
   touch-action: manipulation;
 }
 

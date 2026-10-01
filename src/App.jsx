@@ -87,13 +87,13 @@ export default function App() {
 
   const role = profile.role;
 
-// Everyone can see both pages now.
-const effectivePage = page;
+  // Everyone can see both pages now.
+  const effectivePage = page;
 
-const navItems = [
-  { id: "employees", label: "Employees", icon: "👥" },
-  { id: "scheduler", label: "Scheduler", icon: "📅" },
-];
+  const navItems = [
+    { id: "employees", label: "Employees", icon: "👥" },
+    { id: "scheduler", label: "Scheduler", icon: "📅" },
+  ];
 
   return (
     <div className="min-h-screen flex bg-slate-50">
@@ -132,7 +132,16 @@ const navItems = [
             className="md:hidden w-8 h-8 grid place-items-center rounded-lg text-green-800 hover:bg-green-100 transition shrink-0"
             title="Close menu"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -165,9 +174,7 @@ const navItems = [
             <p className="text-[10px] uppercase tracking-wider text-green-800/60 font-semibold">
               Signed in as
             </p>
-            <p className="text-xs text-green-900 truncate">
-              {profile.email}
-            </p>
+            <p className="text-xs text-green-900 truncate">{profile.email}</p>
             <p className="text-[10px] text-green-700/70 mt-0.5">
               {ROLE_LABELS[role] || role}
             </p>
@@ -176,7 +183,16 @@ const navItems = [
             onClick={() => supabase.auth.signOut()}
             className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-green-800 hover:bg-green-100/70 transition"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
@@ -196,7 +212,16 @@ const navItems = [
             className="md:hidden w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 transition"
             title="Open menu"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
               <line x1="3" y1="18" x2="21" y2="18" />
