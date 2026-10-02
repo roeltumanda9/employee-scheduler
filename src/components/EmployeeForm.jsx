@@ -138,11 +138,14 @@ export default function EmployeeForm({ open, editing, onDone, onCancel }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-        onClick={onCancel}
-      />
+  <div
+    className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4"
+    style={{ height: "100dvh", width: "100vw" }}
+  >
+    <div
+      className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+      onClick={onCancel}
+    />
 
       <div className="relative w-full sm:max-w-2xl bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl ring-1 ring-slate-200 overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col">
         {/* Header */}

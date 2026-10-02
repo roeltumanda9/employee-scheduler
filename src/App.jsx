@@ -6,19 +6,21 @@ import EmployeesPage from "./pages/EmployeesPage";
 import SchedulerPage from "./pages/SchedulerPage";
 import { useAutoLogout } from "./lib/useAutoLogout";
 import IdleWarningModal from "./components/IdleWarningModal";
+import ConfirmModal from "./components/ConfirmModal";
 
 export default function App() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   const [page, setPage] = useState(() => {
     const saved = localStorage.getItem("hmc_page");
     return saved === "scheduler" || saved === "employees" ? saved : "employees";
   });
 
-  // Auto-logout after 30 minutes of inactivity (only when signed in)
+  // Auto-logout after inactivity (only when signed in)
   const { warning: idleWarning, staySignedIn } = useAutoLogout(!!session);
 
   // --- Auth bootstrap ---
@@ -91,8 +93,6 @@ export default function App() {
   }
 
   const role = profile.role;
-
-  // Everyone can see both pages now.
   const effectivePage = page;
 
   const navItems = [
@@ -119,14 +119,14 @@ export default function App() {
           <div className="flex flex-col items-center text-center gap-3 w-full min-w-0">
             <img
               src="/logo.png"
-              alt="Hofilena Medical Centrum"
-              className="w-50 h-50 rounded-full bg-white p-0.5 shrink-0 ring-1 ring-green-100"
+              alt="Hofileña Medical Centrum"
+              className="w-20 h-20 rounded-full bg-white p-0.5 shrink-0 ring-1 ring-green-100"
             />
             <div className="min-w-0 w-full">
               <h1 className="text-xl font-bold tracking-tight leading-tight text-green-900">
                 Hofileña Medical Centrum
               </h1>
-              <p className="text-[20px] text-green-700/70 leading-tight mt-0.5">
+              <p className="text-base text-green-700/70 leading-tight mt-0.5">
                 Employee Scheduler
               </p>
             </div>
@@ -185,7 +185,7 @@ export default function App() {
             </p>
           </div>
           <button
-            onClick={() => supabase.auth.signOut()}
+            onClick={() => setConfirmSignOut(true)}
             className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-green-800 hover:bg-green-100/70 transition"
           >
             <svg
@@ -274,7 +274,7 @@ export default function App() {
             {/* Text */}
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-tight">
-                Hofilena Medical Centrum
+                Hofileña Medical Centrum
               </p>
               <h2 className="text-lg md:text-xl font-bold text-slate-800 leading-tight truncate">
                 {effectivePage === "employees" ? "Employees" : "Scheduler"}
@@ -292,7 +292,39 @@ export default function App() {
         </div>
       </main>
 
+      {/* Idle auto-logout warning */}
       <IdleWarningModal open={idleWarning} onStaySignedIn={staySignedIn} />
+
+      {/* Sign out confirmation */}
+      <ConfirmModal
+        open={confirmSignOut}
+        title="Sign out?"
+        message="You'll need to log in again to access the app."
+        confirmLabel="Yes, sign out"
+        cancelLabel="Stay"
+        variant="warning"
+        icon={
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        }
+        onConfirm={() => {
+          setConfirmSignOut(false);
+          supabase.auth.signOut();
+        }}
+        onCancel={() => setConfirmSignOut(false)}
+      />
     </div>
   );
 }
