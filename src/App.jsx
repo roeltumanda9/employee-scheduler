@@ -19,7 +19,7 @@ export default function App() {
   });
 
   // Auto-logout after 30 minutes of inactivity (only when signed in)
-const { warning: idleWarning, staySignedIn } = useAutoLogout(!!session);
+  const { warning: idleWarning, staySignedIn } = useAutoLogout(!!session);
 
   // --- Auth bootstrap ---
   useEffect(() => {
@@ -119,7 +119,7 @@ const { warning: idleWarning, staySignedIn } = useAutoLogout(!!session);
           <div className="flex flex-col items-center text-center gap-3 w-full min-w-0">
             <img
               src="/logo.png"
-              alt="Hofilena Medical Centre"
+              alt="Hofilena Medical Centrum"
               className="w-50 h-50 rounded-full bg-white p-0.5 shrink-0 ring-1 ring-green-100"
             />
             <div className="min-w-0 w-full">
@@ -209,12 +209,11 @@ const { warning: idleWarning, staySignedIn } = useAutoLogout(!!session);
 
       {/* Main content */}
       <main className="flex-1 min-w-0 flex flex-col">
-        <header className="relative bg-white border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-3 sticky top-0 z-30">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-500 to-green-700" />
-
+        <header className="bg-white/80 backdrop-blur border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-4 sticky top-0 z-30">
+          {/* Hamburger (mobile) */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 transition"
+            className="md:hidden w-9 h-9 grid place-items-center rounded-xl text-slate-600 hover:bg-slate-100 transition shrink-0"
             title="Open menu"
           >
             <svg
@@ -233,9 +232,55 @@ const { warning: idleWarning, staySignedIn } = useAutoLogout(!!session);
             </svg>
           </button>
 
-          <h2 className="text-base md:text-lg font-semibold text-green-800 capitalize">
-            {effectivePage}
-          </h2>
+          {/* Page title block */}
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Icon in a soft green badge */}
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-700 grid place-items-center shrink-0 shadow-sm shadow-green-200">
+              {effectivePage === "employees" ? (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              ) : (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              )}
+            </div>
+
+            {/* Text */}
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-tight">
+                Hofilena Medical Centrum
+              </p>
+              <h2 className="text-lg md:text-xl font-bold text-slate-800 leading-tight truncate">
+                {effectivePage === "employees" ? "Employees" : "Scheduler"}
+              </h2>
+            </div>
+          </div>
         </header>
 
         <div className="p-4 md:p-6 flex-1">
@@ -248,8 +293,6 @@ const { warning: idleWarning, staySignedIn } = useAutoLogout(!!session);
       </main>
 
       <IdleWarningModal open={idleWarning} onStaySignedIn={staySignedIn} />
-
-      
     </div>
   );
 }

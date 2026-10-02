@@ -860,53 +860,55 @@ export default function SchedulerPage({ role }) {
     <div className="space-y-5">
       <div className="sticky top-0 z-30 -mx-4 md:-mx-6 px-4 md:px-6 pt-2 pb-3 bg-slate-100/80 backdrop-blur border-b border-slate-200">
         <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-4 flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-4 flex-1 min-w-[300px]">
             <button
               onClick={() => changeMonth(-1)}
               disabled={!canGoPrev()}
-              className="w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              className="w-11 h-11 grid place-items-center rounded-xl text-green-700 bg-green-50 hover:bg-green-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-green-50 shrink-0"
               title={
                 canGoPrev() ? "Previous month" : "No earlier months available"
               }
             >
               <svg
-                width="16"
-                height="16"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2.5"
+                strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
-            <div className="min-w-[160px] text-center">
-              <div className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+
+            <div className="text-center min-w-[200px]">
+              <div className="text-[11px] uppercase tracking-widest text-green-600/80 font-bold">
                 {isCurrentMonth
                   ? "Current Month"
                   : isPrevMonth
                     ? "Previous Month"
                     : "Next Month"}
               </div>
-              <div className="text-base font-bold text-slate-800">
+              <div className="text-3xl font-black text-green-800 tracking-tight leading-none mt-0.5">
                 {months[month - 1]} {year}
               </div>
             </div>
+
             <button
               onClick={() => changeMonth(1)}
               disabled={!canGoNext()}
-              className="w-9 h-9 grid place-items-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              className="w-11 h-11 grid place-items-center rounded-xl text-green-700 bg-green-50 hover:bg-green-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-green-50 shrink-0"
               title={canGoNext() ? "Next month" : "No later months available"}
             >
               <svg
-                width="16"
-                height="16"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2.5"
+                strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
