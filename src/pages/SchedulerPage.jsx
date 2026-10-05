@@ -146,6 +146,26 @@ export default function SchedulerPage({ role }) {
 
   const isAllDepts = dept === "all";
 
+  // Shifts to show in the legend for the current department
+  const legendShifts = useMemo(() => {
+    if (isAllDepts) {
+      // For "All departments" show every shift (including OFF)
+      return Object.values(STATUS_MAP);
+    }
+    const codes = STATUSES_BY_DEPARTMENT[dept] || [];
+    const resolved = codes
+      .map((code) => resolveStatus(STATUS_MAP[code], dept))
+      .filter(Boolean);
+
+    // Make sure OFF is always included, even if a department's list forgot it
+    const hasOff = resolved.some((s) => s.code === "OFF");
+    if (!hasOff && STATUS_MAP["OFF"]) {
+      resolved.push(STATUS_MAP["OFF"]);
+    }
+
+    return resolved;
+  }, [dept, isAllDepts]);
+
   const visibleEmployees = useMemo(() => {
     if (isAllDepts) return employees;
     return employees.filter((e) => e.department === dept);
@@ -1020,8 +1040,46 @@ export default function SchedulerPage({ role }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label="Employees" value={visibleEmployees.length} />
+      <div className="flex flex-wrap items-stretch gap-3">
+        {/* Employees card */}
+        <div className="w-full sm:w-auto sm:min-w-[180px]">
+          <StatCard label="Employees" value={visibleEmployees.length} />
+        </div>
+
+        {/* Shift legend card */}
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-5 py-4 flex-1 min-w-[300px]">
+          <div className="text-xs uppercase tracking-widest text-green-700 font-bold mb-3">
+            Shifts
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            {legendShifts.length === 0 && (
+              <span className="text-sm text-slate-400">
+                No shifts for this department.
+              </span>
+            )}
+
+            {legendShifts.map((s) => (
+              <span key={s.code} className="inline-flex items-center gap-2.5">
+                <span
+                  className={`inline-flex items-center justify-center min-w-[52px] h-9 rounded-lg px-2.5 text-sm font-extrabold tracking-wide shadow-sm ${s.classes}`}
+                >
+                  {s.code}
+                </span>
+                <span className="flex flex-col leading-tight">
+                  <span className="text-sm font-semibold text-slate-800 whitespace-nowrap">
+                    {s.label}
+                  </span>
+                  {s.time && (
+                    <span className="text-xs text-slate-500 whitespace-nowrap">
+                      {s.time}
+                    </span>
+                  )}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
 
       {loading ? (
@@ -1277,12 +1335,12 @@ function DepartmentDropdown({ value, onChange }) {
 
 function StatCard({ label, value }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-4">
+    <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-5 py-4 h-full flex flex-col items-center justify-center text-center">
       <div className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
         {label}
       </div>
       <div className="mt-1">
-        <div className="text-2xl font-bold text-slate-800">{value}</div>
+        <div className="text-3xl font-bold text-slate-800">{value}</div>
       </div>
     </div>
   );
