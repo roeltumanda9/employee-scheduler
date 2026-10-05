@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   STATUSES,
   STATUS_MAP,
@@ -335,6 +335,44 @@ function CellButton({
   const btnRef = useRef(null);
   const current = status ? STATUS_MAP[status] : null;
 
+  // Keep the popup glued to its cell while scrolling / resizing
+  useEffect(() => {
+    if (!pos) return;
+
+    function reposition() {
+      if (!btnRef.current) return;
+      const r = btnRef.current.getBoundingClientRect();
+      const POPUP_W = 208;
+      const POPUP_H = 280;
+
+      let left = r.left;
+      let top = r.bottom + 6;
+
+      // Clamp horizontally
+      if (left + POPUP_W > window.innerWidth - 8) {
+        left = window.innerWidth - POPUP_W - 8;
+      }
+      if (left < 8) left = 8;
+
+      // If it would overflow the bottom, show above the cell
+      if (top + POPUP_H > window.innerHeight - 8) {
+        top = r.top - POPUP_H - 6;
+        if (top < 8) top = 8;
+      }
+
+      setPos({ top, left });
+    }
+
+    // Scroll (capture phase catches inner scroll containers too)
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
+
+    return () => {
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reposition);
+    };
+  }, [pos]);
+
   function handleClick() {
     if (readOnly) return;
     if (pos) {
@@ -344,7 +382,7 @@ function CellButton({
 
     const r = btnRef.current.getBoundingClientRect();
     const POPUP_W = 208;
-    const POPUP_H = 240;
+    const POPUP_H = 280;
 
     let left = r.left;
     let top = r.bottom + 6;
