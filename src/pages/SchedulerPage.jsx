@@ -51,14 +51,8 @@ export default function SchedulerPage({ role }) {
   function monthOffset(delta) {
     let m = todayMonth + delta;
     let y = todayYear;
-    if (m < 1) {
-      m = 12;
-      y -= 1;
-    }
-    if (m > 12) {
-      m = 1;
-      y += 1;
-    }
+    if (m < 1) { m = 12; y -= 1; }
+    if (m > 12) { m = 1; y += 1; }
     return { year: y, month: m };
   }
 
@@ -68,7 +62,8 @@ export default function SchedulerPage({ role }) {
   function isAllowed(y, m) {
     const key = y * 100 + m;
     return (
-      key >= PREV.year * 100 + PREV.month && key <= NEXT.year * 100 + NEXT.month
+      key >= PREV.year * 100 + PREV.month &&
+      key <= NEXT.year * 100 + NEXT.month
     );
   }
 
@@ -82,10 +77,8 @@ export default function SchedulerPage({ role }) {
     const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
     const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
     if (
-      savedM >= 1 &&
-      savedM <= 12 &&
-      savedY >= 2000 &&
-      savedY <= 2100 &&
+      savedM >= 1 && savedM <= 12 &&
+      savedY >= 2000 && savedY <= 2100 &&
       isAllowed(savedY, savedM)
     ) {
       return savedM;
@@ -97,10 +90,8 @@ export default function SchedulerPage({ role }) {
     const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
     const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
     if (
-      savedM >= 1 &&
-      savedM <= 12 &&
-      savedY >= 2000 &&
-      savedY <= 2100 &&
+      savedM >= 1 && savedM <= 12 &&
+      savedY >= 2000 && savedY <= 2100 &&
       isAllowed(savedY, savedM)
     ) {
       return savedY;
@@ -131,18 +122,8 @@ export default function SchedulerPage({ role }) {
 
   const lastDay = allDays.length ? allDays[allDays.length - 1].day : 30;
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
   ];
 
   const isAllDepts = dept === "all";
@@ -235,7 +216,7 @@ export default function SchedulerPage({ role }) {
 
     setSchedules((prev) => {
       const existing = prev.find(
-        (s) => s.employee_id === employeeId && s.date === iso,
+        (s) => s.employee_id === employeeId && s.date === iso
       );
 
       if (!status) {
@@ -243,7 +224,9 @@ export default function SchedulerPage({ role }) {
       }
 
       if (existing) {
-        return prev.map((s) => (s.id === existing.id ? { ...s, status } : s));
+        return prev.map((s) =>
+          s.id === existing.id ? { ...s, status } : s
+        );
       }
 
       return [
@@ -284,7 +267,9 @@ export default function SchedulerPage({ role }) {
     setPending(newPending);
 
     setSchedules((prev) =>
-      prev.filter((s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))),
+      prev.filter(
+        (s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))
+      )
     );
   }
 
@@ -304,7 +289,7 @@ export default function SchedulerPage({ role }) {
       const [employeeId, iso] = key.split("|");
 
       const existing = editSnapshot?.find(
-        (s) => s.employee_id === employeeId && s.date === iso,
+        (s) => s.employee_id === employeeId && s.date === iso
       );
 
       if (status === null) {
@@ -355,14 +340,8 @@ export default function SchedulerPage({ role }) {
   function changeMonth(delta) {
     let m = month + delta;
     let y = year;
-    if (m < 1) {
-      m = 12;
-      y -= 1;
-    }
-    if (m > 12) {
-      m = 1;
-      y += 1;
-    }
+    if (m < 1) { m = 12; y -= 1; }
+    if (m > 12) { m = 1; y += 1; }
     if (!isAllowed(y, m)) return;
     setMonth(m);
     setYear(y);
@@ -393,7 +372,7 @@ export default function SchedulerPage({ role }) {
         <th class="day">
           <div class="weekday">${d.weekday.toUpperCase()}</div>
           <div class="daynum">${d.day}</div>
-        </th>`,
+        </th>`
       )
       .join("");
 
@@ -762,7 +741,7 @@ export default function SchedulerPage({ role }) {
             <span class="legend-text">
               ${s.label}${s.time ? ` — ${s.time}` : ""}
             </span>
-          </span>`,
+          </span>`
           )
           .join("")}
       </div>
@@ -815,13 +794,11 @@ export default function SchedulerPage({ role }) {
       <div class="sig">
         <div class="label-top">Prepared by:</div>
         <div class="sign-space"></div>
-        ${
-          prepared
-            ? `<div class="name">${prepared.name}</div>
+        ${prepared
+          ? `<div class="name">${prepared.name}</div>
              <div class="title">${prepared.title}</div>`
-            : `<div class="name">&nbsp;</div>
-             <div class="title">&nbsp;</div>`
-        }
+          : `<div class="name">&nbsp;</div>
+             <div class="title">&nbsp;</div>`}
       </div>
       <div class="sig">
         <div class="label-top">Checked by:</div>
@@ -863,8 +840,8 @@ export default function SchedulerPage({ role }) {
             : new Promise((res) => {
                 img.onload = res;
                 img.onerror = res;
-              }),
-        ),
+              })
+        )
       );
 
     const ready = () => {
@@ -895,47 +872,35 @@ export default function SchedulerPage({ role }) {
 
   const isCurrentMonth = month === todayMonth && year === todayYear;
   const isPrevMonth =
-    !isCurrentMonth && year * 100 + month < todayYear * 100 + todayMonth;
+    !isCurrentMonth &&
+    (year * 100 + month) < (todayYear * 100 + todayMonth);
   const isNextMonth =
-    !isCurrentMonth && year * 100 + month > todayYear * 100 + todayMonth;
+    !isCurrentMonth &&
+    (year * 100 + month) > (todayYear * 100 + todayMonth);
 
   return (
-    <div className="space-y-4 md:space-y-5">
-      <div className="sticky top-0 z-30 -mx-4 md:-mx-6 px-3 md:px-6 pt-2 pb-2 md:pb-3 bg-slate-100/80 backdrop-blur border-b border-slate-200">
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-3 md:p-5 flex flex-col md:flex-row md:flex-wrap items-stretch md:items-end gap-3 md:gap-4">
+    <div className="space-y-4 sm:space-y-5">
+      <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 px-3 sm:px-6 pt-2 pb-2 sm:pb-3 bg-slate-100/80 backdrop-blur border-b border-slate-200">
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-3 sm:p-5 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3 sm:gap-4">
           {/* MONTH */}
-          <div className="flex flex-col items-center w-full md:flex-1 md:min-w-[340px] md:w-auto">
-            <div className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 md:mb-2">
-              {isCurrentMonth
-                ? "Current Month"
-                : isPrevMonth
-                  ? "Previous Month"
-                  : "Next Month"}
+          <div className="flex flex-col items-center w-full sm:flex-1 sm:min-w-[340px] sm:w-auto">
+            <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
+              {isCurrentMonth ? "Current Month" : isPrevMonth ? "Previous Month" : "Next Month"}
             </div>
-            <div className="flex items-center justify-center gap-2 md:gap-5 h-12 md:h-16 w-full">
+            <div className="flex items-center justify-center gap-2 sm:gap-5 h-12 sm:h-16 w-full">
               <button
                 onClick={() => changeMonth(-1)}
                 disabled={!canGoPrev()}
-                className="w-10 h-10 md:w-14 md:h-14 grid place-items-center rounded-xl md:rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm md:shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
-                title={
-                  canGoPrev() ? "Previous month" : "No earlier months available"
-                }
+                className="w-10 h-10 sm:w-14 sm:h-14 grid place-items-center rounded-xl sm:rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm sm:shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
+                title={canGoPrev() ? "Previous month" : "No earlier months available"}
               >
-                <svg
-                  className="w-5 h-5 md:w-7 md:h-7"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+                <svg className="w-5 h-5 sm:w-7 sm:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
 
-              <div className="text-center flex-1 md:flex-none md:min-w-[260px]">
-                <div className="text-xl sm:text-2xl md:text-5xl font-black text-green-800 tracking-tight leading-none">
+              <div className="text-center flex-1 sm:flex-none sm:min-w-[260px]">
+                <div className="text-xl xs:text-2xl sm:text-5xl font-black text-green-800 tracking-tight leading-none">
                   {months[month - 1]} {year}
                 </div>
               </div>
@@ -943,18 +908,10 @@ export default function SchedulerPage({ role }) {
               <button
                 onClick={() => changeMonth(1)}
                 disabled={!canGoNext()}
-                className="w-10 h-10 md:w-14 md:h-14 grid place-items-center rounded-xl md:rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm md:shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
+                className="w-10 h-10 sm:w-14 sm:h-14 grid place-items-center rounded-xl sm:rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm sm:shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
                 title={canGoNext() ? "Next month" : "No later months available"}
               >
-                <svg
-                  className="w-5 h-5 md:w-7 md:h-7"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+                <svg className="w-5 h-5 sm:w-7 sm:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </button>
@@ -964,16 +921,16 @@ export default function SchedulerPage({ role }) {
           <div className="hidden xl:block h-16 w-px bg-slate-200" />
 
           {/* PERIOD */}
-          <div className="flex flex-col items-center w-full md:w-auto">
-            <div className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 md:mb-2">
+          <div className="flex flex-col items-center w-full sm:w-auto">
+            <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
               Period
             </div>
-            <div className="inline-flex rounded-xl md:rounded-2xl bg-slate-100 p-1 md:p-1.5 h-11 md:h-16 items-center shadow-inner w-full md:w-auto justify-center">
+            <div className="inline-flex rounded-xl sm:rounded-2xl bg-slate-100 p-1 sm:p-1.5 h-11 sm:h-16 items-center shadow-inner w-full sm:w-auto justify-center">
               <button
                 onClick={() => setHalf(1)}
-                className={`px-3 md:px-5 h-full text-xs md:text-base font-bold rounded-lg md:rounded-xl transition flex-1 md:flex-none ${
+                className={`px-3 sm:px-5 h-full text-xs sm:text-base font-bold rounded-lg sm:rounded-xl transition flex-1 sm:flex-none ${
                   half === 1
-                    ? "bg-white text-green-700 shadow-sm md:shadow-md"
+                    ? "bg-white text-green-700 shadow-sm sm:shadow-md"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -981,9 +938,9 @@ export default function SchedulerPage({ role }) {
               </button>
               <button
                 onClick={() => setHalf(2)}
-                className={`px-3 md:px-5 h-full text-xs md:text-base font-bold rounded-lg md:rounded-xl transition flex-1 md:flex-none ${
+                className={`px-3 sm:px-5 h-full text-xs sm:text-base font-bold rounded-lg sm:rounded-xl transition flex-1 sm:flex-none ${
                   half === 2
-                    ? "bg-white text-green-700 shadow-sm md:shadow-md"
+                    ? "bg-white text-green-700 shadow-sm sm:shadow-md"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -996,8 +953,8 @@ export default function SchedulerPage({ role }) {
 
           {/* ACTIONS */}
           {canEdit && !isAllDepts && (
-            <div className="flex flex-col items-center w-full md:w-auto">
-              <div className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 md:mb-2">
+            <div className="flex flex-col items-center w-full sm:w-auto">
+              <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
                 {editing ? "Editing" : "Actions"}
               </div>
 
@@ -1009,29 +966,21 @@ export default function SchedulerPage({ role }) {
                     setEditing(true);
                   }}
                   disabled={visibleEmployees.length === 0}
-                  className="inline-flex items-center justify-center gap-2 md:gap-3 px-4 md:px-6 h-11 md:h-16 w-full md:w-auto text-sm md:text-base font-black text-white bg-gradient-to-br from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 active:scale-95 shadow-sm md:shadow-md shadow-amber-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-xl md:rounded-2xl transition"
+                  className="inline-flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 h-11 sm:h-16 w-full sm:w-auto text-sm sm:text-base font-black text-white bg-gradient-to-br from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 active:scale-95 shadow-sm sm:shadow-md shadow-amber-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-xl sm:rounded-2xl transition"
                   title="Enable editing"
                 >
-                  <svg
-                    className="w-4 h-4 md:w-5 md:h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 20h9" />
                     <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
                   </svg>
                   EDIT
                 </button>
               ) : (
-                <div className="flex items-center gap-2 md:gap-3 h-11 md:h-16 w-full md:w-auto">
+                <div className="flex items-center gap-2 sm:gap-3 h-11 sm:h-16 w-full sm:w-auto">
                   <button
                     onClick={cancelEdit}
                     disabled={saving}
-                    className="inline-flex items-center justify-center gap-2 md:gap-3 px-3 md:px-5 h-full flex-1 md:flex-none text-sm md:text-base font-black text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 active:scale-95 disabled:opacity-40 rounded-xl md:rounded-2xl transition"
+                    className="inline-flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-5 h-full flex-1 sm:flex-none text-sm sm:text-base font-black text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 active:scale-95 disabled:opacity-40 rounded-xl sm:rounded-2xl transition"
                     title="Discard changes"
                   >
                     CANCEL
@@ -1039,25 +988,17 @@ export default function SchedulerPage({ role }) {
                   <button
                     onClick={saveEdits}
                     disabled={saving || Object.keys(pending).length === 0}
-                    className="inline-flex items-center justify-center gap-2 md:gap-3 px-4 md:px-6 h-full flex-1 md:flex-none text-sm md:text-base font-black text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm md:shadow-md shadow-green-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-xl md:rounded-2xl transition"
+                    className="inline-flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 h-full flex-1 sm:flex-none text-sm sm:text-base font-black text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm sm:shadow-md shadow-green-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-xl sm:rounded-2xl transition"
                     title="Save changes"
                   >
                     {saving ? (
                       <>
-                        <span className="w-4 h-4 md:w-5 md:h-5 border-2 md:border-[3px] border-white/40 border-t-white rounded-full animate-spin" />
+                        <span className="w-4 h-4 sm:w-5 sm:h-5 border-2 sm:border-[3px] border-white/40 border-t-white rounded-full animate-spin" />
                         SAVING…
                       </>
                     ) : (
                       <>
-                        <svg
-                          className="w-4 h-4 md:w-5 md:h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
                         SAVE
@@ -1072,11 +1013,11 @@ export default function SchedulerPage({ role }) {
           <div className="hidden xl:block h-16 w-px bg-slate-200" />
 
           {/* DEPARTMENT */}
-          <div className="flex flex-col items-center w-full md:w-auto">
-            <div className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 md:mb-2">
+          <div className="flex flex-col items-center w-full sm:w-auto">
+            <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
               Department
             </div>
-            <div className="h-11 md:h-16 flex items-stretch w-full md:w-auto">
+            <div className="h-11 sm:h-16 flex items-stretch w-full sm:w-auto">
               <DepartmentDropdown value={dept} onChange={setDept} />
             </div>
           </div>
@@ -1084,31 +1025,19 @@ export default function SchedulerPage({ role }) {
           <div className="hidden xl:block h-16 w-px bg-slate-200" />
 
           {/* TOOLS */}
-          <div className="flex flex-col items-center w-full md:w-auto">
-            <div className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 md:mb-2">
+          <div className="flex flex-col items-center w-full sm:w-auto">
+            <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
               Tools
             </div>
-            <div className="flex items-center gap-2 h-11 md:h-16 w-full md:w-auto">
+            <div className="flex items-center gap-2 h-11 sm:h-16 w-full sm:w-auto">
               {canEdit && editing && (
                 <button
                   onClick={askClearHalf}
                   disabled={isAllDepts || visibleEmployees.length === 0}
-                  className="inline-flex items-center justify-center gap-2 px-3 md:px-4 h-full flex-1 md:flex-none text-xs md:text-sm font-medium rounded-xl md:rounded-2xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                  title={
-                    isAllDepts
-                      ? "Not available in preview mode"
-                      : "Clear this half"
-                  }
+                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 h-full flex-1 sm:flex-none text-xs sm:text-sm font-medium rounded-xl sm:rounded-2xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  title={isAllDepts ? "Not available in preview mode" : "Clear this half"}
                 >
-                  <svg
-                    className="w-3.5 h-3.5 md:w-4 md:h-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="3 6 5 6 21 6" />
                     <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                     <path d="M10 11v6" />
@@ -1121,18 +1050,10 @@ export default function SchedulerPage({ role }) {
               <button
                 onClick={handlePrint}
                 disabled={visibleEmployees.length === 0 || editing}
-                className="inline-flex items-center justify-center gap-2 px-3 md:px-4 h-full flex-1 md:flex-none text-xs md:text-sm font-semibold rounded-xl md:rounded-2xl border border-green-200 text-green-700 bg-white hover:bg-green-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 h-full flex-1 sm:flex-none text-xs sm:text-sm font-semibold rounded-xl sm:rounded-2xl border border-green-200 text-green-700 bg-white hover:bg-green-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
                 title="Print this schedule"
               >
-                <svg
-                  className="w-3.5 h-3.5 md:w-4 md:h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="6 9 6 2 18 2 18 9" />
                   <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                   <rect x="6" y="14" width="12" height="8" />
@@ -1145,26 +1066,17 @@ export default function SchedulerPage({ role }) {
       </div>
 
       {editing && (
-        <div className="bg-amber-50 ring-1 ring-amber-200 rounded-2xl px-3 md:px-4 py-2 md:py-3 flex items-center gap-3 text-xs md:text-sm text-amber-800">
-          <svg
-            className="w-4 h-4 md:w-5 md:h-5 shrink-0"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+        <div className="bg-amber-50 ring-1 ring-amber-200 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-3 text-xs sm:text-sm text-amber-800">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
           </svg>
           <span className="flex-1">
-            <strong>Editing mode</strong> — changes aren't saved until you click{" "}
-            <strong>Save</strong>.
+            <strong>Editing mode</strong> — changes aren't saved until you click <strong>Save</strong>.
           </span>
           <button
             onClick={cancelEdit}
-            className="text-[11px] md:text-xs font-semibold text-amber-900 underline hover:no-underline"
+            className="text-[11px] sm:text-xs font-semibold text-amber-900 underline hover:no-underline"
           >
             Discard
           </button>
@@ -1172,46 +1084,43 @@ export default function SchedulerPage({ role }) {
       )}
 
       {/* Stats row */}
-      <div className="flex flex-col md:flex-row items-stretch gap-3">
-        <div className="w-full md:w-[220px] md:shrink-0 flex">
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-4 py-3 md:px-6 md:py-5 w-full flex flex-col items-center justify-center text-center">
-            <div className="text-[10px] md:text-xs uppercase tracking-widest text-green-700 font-bold">
+      <div className="flex flex-col sm:flex-row items-stretch gap-3">
+        <div className="w-full sm:w-[220px] sm:shrink-0 flex">
+          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-4 py-3 sm:px-6 sm:py-5 w-full flex flex-col items-center justify-center text-center">
+            <div className="text-[10px] sm:text-xs uppercase tracking-widest text-green-700 font-bold">
               Employees
             </div>
-            <div className="mt-1 md:mt-2 text-4xl md:text-6xl font-black text-green-800 leading-none">
+            <div className="mt-1 sm:mt-2 text-4xl sm:text-6xl font-black text-green-800 leading-none">
               {visibleEmployees.length}
             </div>
           </div>
         </div>
 
         {!isAllDepts && legendShifts.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-4 py-3 md:px-6 md:py-5 flex-1">
-            <div className="flex items-baseline justify-between mb-3 md:mb-4">
-              <div className="text-[10px] md:text-xs uppercase tracking-widest text-green-700 font-bold">
+          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-4 py-3 sm:px-6 sm:py-5 flex-1">
+            <div className="flex items-baseline justify-between mb-3 sm:mb-4">
+              <div className="text-[10px] sm:text-xs uppercase tracking-widest text-green-700 font-bold">
                 Shifts
               </div>
-              <div className="text-xs md:text-sm font-bold text-slate-700">
+              <div className="text-xs sm:text-sm font-bold text-slate-700">
                 {dept}
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 md:gap-x-5 gap-y-2 md:gap-y-3">
+            <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 sm:gap-y-3">
               {legendShifts.map((s) => (
-                <div
-                  key={s.code}
-                  className="inline-flex items-center gap-2 md:gap-3"
-                >
+                <div key={s.code} className="inline-flex items-center gap-2 sm:gap-3">
                   <span
-                    className={`inline-flex items-center justify-center min-w-[44px] md:min-w-[56px] h-8 md:h-10 rounded-md md:rounded-lg px-2 md:px-3 text-xs md:text-sm font-black tracking-wide shadow-sm ${s.classes}`}
+                    className={`inline-flex items-center justify-center min-w-[44px] sm:min-w-[56px] h-8 sm:h-10 rounded-md sm:rounded-lg px-2 sm:px-3 text-xs sm:text-sm font-black tracking-wide shadow-sm ${s.classes}`}
                   >
                     {s.code}
                   </span>
                   <div className="flex flex-col leading-tight">
-                    <span className="text-xs md:text-sm font-bold text-slate-800 whitespace-nowrap">
+                    <span className="text-xs sm:text-sm font-bold text-slate-800 whitespace-nowrap">
                       {s.label}
                     </span>
                     {s.time && (
-                      <span className="text-[10px] md:text-xs text-slate-500 whitespace-nowrap">
+                      <span className="text-[10px] sm:text-xs text-slate-500 whitespace-nowrap">
                         {s.time}
                       </span>
                     )}
@@ -1259,19 +1168,10 @@ export default function SchedulerPage({ role }) {
           />
 
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 overflow-hidden">
-            <div className="p-5 md:p-6">
+            <div className="p-5 sm:p-6">
               <div className="flex items-start gap-4">
-                <div className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-rose-50 ring-1 ring-rose-100 grid place-items-center shrink-0">
-                  <svg
-                    className="w-5 h-5 md:w-6 md:h-6"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ color: "#e11d48" }}
-                  >
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-rose-50 ring-1 ring-rose-100 grid place-items-center shrink-0">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                     <line x1="12" y1="9" x2="12" y2="13" />
                     <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -1288,11 +1188,7 @@ export default function SchedulerPage({ role }) {
                     <strong className="text-slate-700">
                       {months[month - 1]} {year}
                     </strong>{" "}
-                    (
-                    {half === 1
-                      ? "1st Half (1–15)"
-                      : `2nd Half (16–${lastDay})`}
-                    ).
+                    ({half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`}).
                   </p>
                   <p className="text-xs text-rose-600 font-medium mt-2">
                     Changes are still pending until you click Save.
@@ -1301,7 +1197,7 @@ export default function SchedulerPage({ role }) {
               </div>
             </div>
 
-            <div className="px-5 md:px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div className="px-5 sm:px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
               <button
                 onClick={() => setConfirmClear(false)}
                 className="px-4 py-2 text-sm font-medium text-slate-600 rounded-xl hover:bg-slate-100 transition"
@@ -1312,16 +1208,7 @@ export default function SchedulerPage({ role }) {
                 onClick={confirmClearHalf}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-rose-600 rounded-xl hover:bg-rose-700 active:scale-95 shadow-sm shadow-rose-200 transition"
               >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                 </svg>
@@ -1369,11 +1256,11 @@ function DepartmentDropdown({ value, onChange }) {
   ];
 
   return (
-    <div ref={wrapRef} className="relative w-full md:w-auto">
+    <div ref={wrapRef} className="relative w-full sm:w-auto">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex items-center gap-2 rounded-xl md:rounded-2xl border px-3 md:px-4 h-full text-xs md:text-base font-bold transition w-full md:min-w-[220px] md:w-auto justify-between ${
+        className={`inline-flex items-center gap-2 rounded-xl sm:rounded-2xl border px-3 sm:px-4 h-full text-xs sm:text-base font-bold transition w-full sm:min-w-[220px] sm:w-auto justify-between ${
           open
             ? "border-green-500 ring-2 ring-green-100 bg-white"
             : "border-slate-200 bg-slate-50/60 hover:bg-white"
@@ -1395,9 +1282,7 @@ function DepartmentDropdown({ value, onChange }) {
             <path d="M5 21V7l7-4 7 4v14" />
             <path d="M9 21v-6h6v6" />
           </svg>
-          <span
-            className={`truncate ${isAll ? "text-green-700 font-semibold" : "text-slate-800"}`}
-          >
+          <span className={`truncate ${isAll ? "text-green-700 font-semibold" : "text-slate-800"}`}>
             {label}
           </span>
         </span>
@@ -1418,7 +1303,7 @@ function DepartmentDropdown({ value, onChange }) {
       </button>
 
       {open && (
-        <div className="absolute z-40 top-full left-0 right-0 md:right-auto mt-2 md:w-72 bg-white rounded-2xl shadow-xl ring-1 ring-slate-200 p-1.5">
+        <div className="absolute z-40 top-full left-0 right-0 sm:right-auto mt-2 sm:w-72 bg-white rounded-2xl shadow-xl ring-1 ring-slate-200 p-1.5">
           <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
             Select department
           </div>
