@@ -51,8 +51,14 @@ export default function SchedulerPage({ role }) {
   function monthOffset(delta) {
     let m = todayMonth + delta;
     let y = todayYear;
-    if (m < 1) { m = 12; y -= 1; }
-    if (m > 12) { m = 1; y += 1; }
+    if (m < 1) {
+      m = 12;
+      y -= 1;
+    }
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
     return { year: y, month: m };
   }
 
@@ -62,8 +68,7 @@ export default function SchedulerPage({ role }) {
   function isAllowed(y, m) {
     const key = y * 100 + m;
     return (
-      key >= PREV.year * 100 + PREV.month &&
-      key <= NEXT.year * 100 + NEXT.month
+      key >= PREV.year * 100 + PREV.month && key <= NEXT.year * 100 + NEXT.month
     );
   }
 
@@ -77,8 +82,10 @@ export default function SchedulerPage({ role }) {
     const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
     const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
     if (
-      savedM >= 1 && savedM <= 12 &&
-      savedY >= 2000 && savedY <= 2100 &&
+      savedM >= 1 &&
+      savedM <= 12 &&
+      savedY >= 2000 &&
+      savedY <= 2100 &&
       isAllowed(savedY, savedM)
     ) {
       return savedM;
@@ -90,8 +97,10 @@ export default function SchedulerPage({ role }) {
     const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
     const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
     if (
-      savedM >= 1 && savedM <= 12 &&
-      savedY >= 2000 && savedY <= 2100 &&
+      savedM >= 1 &&
+      savedM <= 12 &&
+      savedY >= 2000 &&
+      savedY <= 2100 &&
       isAllowed(savedY, savedM)
     ) {
       return savedY;
@@ -122,8 +131,18 @@ export default function SchedulerPage({ role }) {
 
   const lastDay = allDays.length ? allDays[allDays.length - 1].day : 30;
   const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const isAllDepts = dept === "all";
@@ -221,7 +240,7 @@ export default function SchedulerPage({ role }) {
     // Update local schedules array so the UI reflects the change
     setSchedules((prev) => {
       const existing = prev.find(
-        (s) => s.employee_id === employeeId && s.date === iso
+        (s) => s.employee_id === employeeId && s.date === iso,
       );
 
       if (!status) {
@@ -229,9 +248,7 @@ export default function SchedulerPage({ role }) {
       }
 
       if (existing) {
-        return prev.map((s) =>
-          s.id === existing.id ? { ...s, status } : s
-        );
+        return prev.map((s) => (s.id === existing.id ? { ...s, status } : s));
       }
 
       return [
@@ -274,9 +291,7 @@ export default function SchedulerPage({ role }) {
 
     // Remove all affected rows locally
     setSchedules((prev) =>
-      prev.filter(
-        (s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))
-      )
+      prev.filter((s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))),
     );
   }
 
@@ -296,7 +311,7 @@ export default function SchedulerPage({ role }) {
       const [employeeId, iso] = key.split("|");
 
       const existing = editSnapshot?.find(
-        (s) => s.employee_id === employeeId && s.date === iso
+        (s) => s.employee_id === employeeId && s.date === iso,
       );
 
       if (status === null) {
@@ -347,8 +362,14 @@ export default function SchedulerPage({ role }) {
   function changeMonth(delta) {
     let m = month + delta;
     let y = year;
-    if (m < 1) { m = 12; y -= 1; }
-    if (m > 12) { m = 1; y += 1; }
+    if (m < 1) {
+      m = 12;
+      y -= 1;
+    }
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
     if (!isAllowed(y, m)) return;
     setMonth(m);
     setYear(y);
@@ -379,7 +400,7 @@ export default function SchedulerPage({ role }) {
         <th class="day">
           <div class="weekday">${d.weekday.toUpperCase()}</div>
           <div class="daynum">${d.day}</div>
-        </th>`
+        </th>`,
       )
       .join("");
 
@@ -748,7 +769,7 @@ export default function SchedulerPage({ role }) {
             <span class="legend-text">
               ${s.label}${s.time ? ` — ${s.time}` : ""}
             </span>
-          </span>`
+          </span>`,
           )
           .join("")}
       </div>
@@ -801,11 +822,13 @@ export default function SchedulerPage({ role }) {
       <div class="sig">
         <div class="label-top">Prepared by:</div>
         <div class="sign-space"></div>
-        ${prepared
-          ? `<div class="name">${prepared.name}</div>
+        ${
+          prepared
+            ? `<div class="name">${prepared.name}</div>
              <div class="title">${prepared.title}</div>`
-          : `<div class="name">&nbsp;</div>
-             <div class="title">&nbsp;</div>`}
+            : `<div class="name">&nbsp;</div>
+             <div class="title">&nbsp;</div>`
+        }
       </div>
       <div class="sig">
         <div class="label-top">Checked by:</div>
@@ -847,8 +870,8 @@ export default function SchedulerPage({ role }) {
             : new Promise((res) => {
                 img.onload = res;
                 img.onerror = res;
-              })
-        )
+              }),
+        ),
       );
 
     const ready = () => {
@@ -879,55 +902,114 @@ export default function SchedulerPage({ role }) {
 
   const isCurrentMonth = month === todayMonth && year === todayYear;
   const isPrevMonth =
-    !isCurrentMonth &&
-    (year * 100 + month) < (todayYear * 100 + todayMonth);
+    !isCurrentMonth && year * 100 + month < todayYear * 100 + todayMonth;
   const isNextMonth =
-    !isCurrentMonth &&
-    (year * 100 + month) > (todayYear * 100 + todayMonth);
+    !isCurrentMonth && year * 100 + month > todayYear * 100 + todayMonth;
 
   return (
     <div className="space-y-5">
       <div className="sticky top-0 z-30 -mx-4 md:-mx-6 px-4 md:px-6 pt-2 pb-3 bg-slate-100/80 backdrop-blur border-b border-slate-200">
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-4 flex flex-wrap items-center gap-3">
-          <div className="flex items-center justify-center gap-4 flex-1 min-w-[300px]">
-            <button
-              onClick={() => changeMonth(-1)}
-              disabled={!canGoPrev()}
-              className="w-11 h-11 grid place-items-center rounded-xl text-green-700 bg-green-50 hover:bg-green-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-green-50 shrink-0"
-              title={canGoPrev() ? "Previous month" : "No earlier months available"}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-
-            <div className="text-center min-w-[200px]">
-              <div className="text-[11px] uppercase tracking-widest text-green-600/80 font-bold">
-                {isCurrentMonth ? "Current Month" : isPrevMonth ? "Previous Month" : "Next Month"}
-              </div>
-              <div className="text-3xl font-black text-green-800 tracking-tight leading-none mt-0.5">
-                {months[month - 1]} {year}
-              </div>
+        <div className="bg-white rounded-2xl shadow-md ring-2 ring-slate-100 p-5 flex flex-wrap items-end gap-4">
+          {/* ---------- MONTH ---------- */}
+          <div className="flex flex-col items-center flex-1 min-w-[340px]">
+            <div className="text-xs uppercase tracking-[0.25em] text-green-700 font-black mb-2">
+              {isCurrentMonth
+                ? "Current Month"
+                : isPrevMonth
+                  ? "Previous Month"
+                  : "Next Month"}
             </div>
+            <div className="flex items-center justify-center gap-5 h-16">
+              <button
+                onClick={() => changeMonth(-1)}
+                disabled={!canGoPrev()}
+                className="w-14 h-14 grid place-items-center rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
+                title={
+                  canGoPrev() ? "Previous month" : "No earlier months available"
+                }
+              >
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
 
-            <button
-              onClick={() => changeMonth(1)}
-              disabled={!canGoNext()}
-              className="w-11 h-11 grid place-items-center rounded-xl text-green-700 bg-green-50 hover:bg-green-100 active:scale-95 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-green-50 shrink-0"
-              title={canGoNext() ? "Next month" : "No later months available"}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
+              <div className="text-center min-w-[260px]">
+                <div className="text-5xl font-black text-green-800 tracking-tight leading-none">
+                  {months[month - 1]} {year}
+                </div>
+              </div>
+
+              <button
+                onClick={() => changeMonth(1)}
+                disabled={!canGoNext()}
+                className="w-14 h-14 grid place-items-center rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
+                title={canGoNext() ? "Next month" : "No later months available"}
+              >
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          <div className="hidden md:block h-8 w-px bg-slate-200" />
+          <div className="hidden xl:block h-16 w-px bg-slate-200" />
 
-          <DepartmentDropdown value={dept} onChange={setDept} />
+          {/* ---------- PERIOD ---------- */}
+          <div className="flex flex-col items-center">
+            <div className="text-xs uppercase tracking-[0.2em] text-green-700 font-black mb-2">
+              Period
+            </div>
+            <div className="inline-flex rounded-2xl bg-slate-100 p-1.5 h-16 items-center shadow-inner">
+              <button
+                onClick={() => setHalf(1)}
+                className={`px-5 h-full text-base font-bold rounded-xl transition ${
+                  half === 1
+                    ? "bg-white text-green-700 shadow-md"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                1st · 1–15
+              </button>
+              <button
+                onClick={() => setHalf(2)}
+                className={`px-5 h-full text-base font-bold rounded-xl transition ${
+                  half === 2
+                    ? "bg-white text-green-700 shadow-md"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                2nd · 16–{lastDay}
+              </button>
+            </div>
+          </div>
 
+          <div className="hidden xl:block h-16 w-px bg-slate-200" />
+
+          {/* ---------- EDIT / SAVE / CANCEL ---------- */}
           {canEdit && !isAllDepts && (
-            <>
+            <div className="flex flex-col items-center">
+              <div className="text-xs uppercase tracking-[0.2em] text-green-700 font-black mb-2">
+                {editing ? "Editing" : "Actions"}
+              </div>
+
               {!editing ? (
                 <button
                   onClick={() => {
@@ -936,124 +1018,164 @@ export default function SchedulerPage({ role }) {
                     setEditing(true);
                   }}
                   disabled={visibleEmployees.length === 0}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-amber-200 text-amber-700 bg-white hover:bg-amber-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="inline-flex items-center gap-3 px-6 h-16 text-base font-black text-white bg-gradient-to-br from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 active:scale-95 shadow-md shadow-amber-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-2xl transition"
                   title="Enable editing"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M12 20h9" />
                     <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
                   </svg>
-                  Edit
+                  EDIT
                 </button>
               ) : (
-                <>
+                <div className="flex items-center gap-3 h-16">
                   <button
                     onClick={cancelEdit}
                     disabled={saving}
-                    className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 active:scale-95 disabled:opacity-40 transition"
+                    className="inline-flex items-center gap-3 px-5 h-full text-base font-black text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 active:scale-95 disabled:opacity-40 rounded-2xl transition"
                     title="Discard changes"
                   >
-                    Cancel
+                    CANCEL
                   </button>
                   <button
                     onClick={saveEdits}
                     disabled={saving || Object.keys(pending).length === 0}
-                    className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 active:scale-95 shadow-sm shadow-green-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    className="inline-flex items-center gap-3 px-6 h-full text-base font-black text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-md shadow-green-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-2xl transition"
                     title="Save changes"
                   >
                     {saving ? (
                       <>
-                        <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                        Saving…
+                        <span className="w-5 h-5 border-[3px] border-white/40 border-t-white rounded-full animate-spin" />
+                        SAVING…
                       </>
                     ) : (
                       <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
-                        Save
+                        SAVE
                       </>
                     )}
                   </button>
-                </>
+                </div>
               )}
-            </>
+            </div>
           )}
 
-          {canEdit && editing && (
-            <button
-              onClick={askClearHalf}
-              disabled={isAllDepts || visibleEmployees.length === 0}
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
-              title={isAllDepts ? "Not available in preview mode" : "Clear this half"}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                <path d="M10 11v6" />
-                <path d="M14 11v6" />
-              </svg>
-              Clear
-            </button>
-          )}
+          <div className="hidden xl:block h-16 w-px bg-slate-200" />
 
-          <button
-            onClick={handlePrint}
-            disabled={visibleEmployees.length === 0 || editing}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl border border-green-200 text-green-700 bg-white hover:bg-green-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
-            title="Print this schedule"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 6 2 18 2 18 9" />
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-              <rect x="6" y="14" width="12" height="8" />
-            </svg>
-            Print
-          </button>
-
-          <div className="hidden md:block h-8 w-px bg-slate-200" />
-
-          <div className="inline-flex rounded-xl bg-slate-100 p-1">
-            <button
-              onClick={() => setHalf(1)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition ${
-                half === 1 ? "bg-white text-green-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              1st · 1–15
-            </button>
-            <button
-              onClick={() => setHalf(2)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition ${
-                half === 2 ? "bg-white text-green-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              2nd · 16–{lastDay}
-            </button>
+          {/* ---------- DEPARTMENT ---------- */}
+          <div className="flex flex-col items-center">
+            <div className="text-xs uppercase tracking-[0.2em] text-green-700 font-black mb-2">
+              Department
+            </div>
+            <div className="h-16 flex items-stretch">
+              <DepartmentDropdown value={dept} onChange={setDept} />
+            </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
-            {(isAllDepts || !canEdit) && (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-green-700 bg-green-50 ring-1 ring-green-100 rounded-full px-2.5 py-1">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
+          <div className="hidden xl:block h-16 w-px bg-slate-200" />
+
+          {/* ---------- TOOLS ---------- */}
+          <div className="flex flex-col items-center">
+            <div className="text-xs uppercase tracking-[0.2em] text-green-700 font-black mb-2">
+              Tools
+            </div>
+            <div className="flex items-center gap-2 h-16">
+              {canEdit && editing && (
+                <button
+                  onClick={askClearHalf}
+                  disabled={isAllDepts || visibleEmployees.length === 0}
+                  className="inline-flex items-center gap-2 px-4 h-full text-sm font-medium rounded-2xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  title={
+                    isAllDepts
+                      ? "Not available in preview mode"
+                      : "Clear this half"
+                  }
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    <path d="M10 11v6" />
+                    <path d="M14 11v6" />
+                  </svg>
+                  Clear
+                </button>
+              )}
+
+              <button
+                onClick={handlePrint}
+                disabled={visibleEmployees.length === 0 || editing}
+                className="inline-flex items-center gap-2 px-4 h-full text-sm font-semibold rounded-2xl border border-green-200 text-green-700 bg-white hover:bg-green-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                title="Print this schedule"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
                 </svg>
-                Preview only
-              </span>
-            )}
+                Print
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {editing && (
         <div className="bg-amber-50 ring-1 ring-amber-200 rounded-2xl px-4 py-3 flex items-center gap-3 text-sm text-amber-800">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0"
+          >
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
           </svg>
           <span className="flex-1">
-            <strong>Editing mode</strong> — changes aren't saved until you click <strong>Save</strong>.
+            <strong>Editing mode</strong> — changes aren't saved until you click{" "}
+            <strong>Save</strong>.
           </span>
           <button
             onClick={cancelEdit}
@@ -1082,9 +1204,7 @@ export default function SchedulerPage({ role }) {
               <div className="text-xs uppercase tracking-widest text-green-700 font-bold">
                 Shifts
               </div>
-              <div className="text-sm font-bold text-slate-700">
-                {dept}
-              </div>
+              <div className="text-sm font-bold text-slate-700">{dept}</div>
             </div>
 
             <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -1148,7 +1268,17 @@ export default function SchedulerPage({ role }) {
             <div className="p-6">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-rose-50 ring-1 ring-rose-100 grid place-items-center shrink-0">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-rose-600">
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-rose-600"
+                  >
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                     <line x1="12" y1="9" x2="12" y2="13" />
                     <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -1165,7 +1295,11 @@ export default function SchedulerPage({ role }) {
                     <strong className="text-slate-700">
                       {months[month - 1]} {year}
                     </strong>{" "}
-                    ({half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`}).
+                    (
+                    {half === 1
+                      ? "1st Half (1–15)"
+                      : `2nd Half (16–${lastDay})`}
+                    ).
                   </p>
                   <p className="text-xs text-rose-600 font-medium mt-2">
                     Changes are still pending until you click Save.
@@ -1185,7 +1319,16 @@ export default function SchedulerPage({ role }) {
                 onClick={confirmClearHalf}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-rose-600 rounded-xl hover:bg-rose-700 active:scale-95 shadow-sm shadow-rose-200 transition"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                 </svg>
@@ -1237,7 +1380,7 @@ function DepartmentDropdown({ value, onChange }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition min-w-[200px] justify-between ${
+        className={`inline-flex items-center gap-2 rounded-2xl border px-4 h-full text-base font-bold transition min-w-[220px] justify-between ${
           open
             ? "border-green-500 ring-2 ring-green-100 bg-white"
             : "border-slate-200 bg-slate-50/60 hover:bg-white"
@@ -1246,15 +1389,22 @@ function DepartmentDropdown({ value, onChange }) {
         <span className="flex items-center gap-2 min-w-0">
           <svg
             className={isAll ? "text-green-600" : "text-slate-400"}
-            width="14" height="14" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
             <path d="M3 21h18" />
             <path d="M5 21V7l7-4 7 4v14" />
             <path d="M9 21v-6h6v6" />
           </svg>
-          <span className={`truncate ${isAll ? "text-green-700 font-semibold" : "text-slate-800"}`}>
+          <span
+            className={`truncate ${isAll ? "text-green-700 font-semibold" : "text-slate-800"}`}
+          >
             {label}
           </span>
           {isAll && (
@@ -1266,9 +1416,14 @@ function DepartmentDropdown({ value, onChange }) {
 
         <svg
           className={`text-slate-400 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-          width="14" height="14" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" strokeWidth="2.5"
-          strokeLinecap="round" strokeLinejoin="round"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -1306,9 +1461,14 @@ function DepartmentDropdown({ value, onChange }) {
                 {active && (
                   <svg
                     className="text-green-600 shrink-0"
-                    width="16" height="16" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" strokeWidth="3"
-                    strokeLinecap="round" strokeLinejoin="round"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
