@@ -53,6 +53,13 @@ export default function App() {
     };
   }, []);
 
+  // Reset the idle timer whenever a session starts (fresh login)
+  useEffect(() => {
+    if (session) {
+      localStorage.setItem("hmc_last_activity", String(Date.now()));
+    }
+  }, [session]);
+
   useEffect(() => {
     setSidebarOpen(false);
   }, [page]);

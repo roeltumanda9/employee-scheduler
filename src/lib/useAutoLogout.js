@@ -1,17 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
 
-// 30 minutes in milliseconds — change to whatever you want
-const IDLE_TIMEOUT = 15 * 60 * 1000;        // 15 minutes
-const WARN_BEFORE = 2 * 60 * 1000;          // warn 2 min before
+// 15 minutes idle → sign out
+const IDLE_TIMEOUT = 15 * 60 * 1000;
+// Warn 2 minutes before
+const WARN_BEFORE = 2 * 60 * 1000;
 
-// Where we store the last activity timestamp
 const STORAGE_KEY = "hmc_last_activity";
 
 export function useAutoLogout(enabled) {
   const [warning, setWarning] = useState(false);
-  const logoutTimer = useRef(null);
-  const warnTimer = useRef(null);
 
   useEffect(() => {
     if (!enabled) {
@@ -19,25 +17,22 @@ export function useAutoLogout(enabled) {
       return;
     }
 
-    // --- 1. On mount, check if the user has been away too long ---
+    // --- 1. On mount: if the timestamp is missing OR too old,
+    //        treat this as a fresh session and reset it.
+    //        Do NOT sign out on mount — that was the bug.
     const stored = parseInt(localStorage.getItem(STORAGE_KEY), 10);
-    if (Number.isFinite(stored)) {
-      const elapsed = Date.now() - stored;
-      if (elapsed >= IDLE_TIMEOUT) {
-        // Too long — sign out immediately
-        supabase.auth.signOut();
-        return;
-      }
-      if (elapsed >= IDLE_TIMEOUT - WARN_BEFORE) {
-        // In the warning window — show the warning
-        setWarning(true);
-      }
-    } else {
-      // First load — set the timestamp
-      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    const now = Date.now();
+    const elapsed = Number.isFinite(stored) ? now - stored : 0;
+
+    if (!Number.isFinite(stored) || elapsed >= IDLE_TIMEOUT) {
+      // Fresh start — reset the clock
+      localStorage.setItem(STORAGE_KEY, String(now));
+    } else if (elapsed >= IDLE_TIMEOUT - WARN_BEFORE) {
+      // In the warning window — show the warning
+      setWarning(true);
     }
 
-    // --- 2. Helper to record activity ---
+    // --- 2. Record user activity ---
     function recordActivity() {
       // Don't reset while warning is showing — only "Stay signed in" does that
       if (warning) return;
@@ -64,7 +59,7 @@ export function useAutoLogout(enabled) {
     }
     document.addEventListener("visibilitychange", onVisible);
 
-    // --- 4. Ticker: every few seconds, check how long it's been ---
+    // --- 4. Ticker: every 3 seconds, check how long it's been ---
     function tick() {
       const last = parseInt(localStorage.getItem(STORAGE_KEY), 10);
       if (!Number.isFinite(last)) {
@@ -72,33 +67,30 @@ export function useAutoLogout(enabled) {
         return;
       }
 
-      const elapsed = Date.now() - last;
+      const diff = Date.now() - last;
 
-      if (elapsed >= IDLE_TIMEOUT) {
-        // Too long — sign out
+      if (diff >= IDLE_TIMEOUT) {
+        // Time to sign out
+        localStorage.removeItem(STORAGE_KEY);
         supabase.auth.signOut();
         return;
       }
 
-      if (elapsed >= IDLE_TIMEOUT - WARN_BEFORE) {
+      if (diff >= IDLE_TIMEOUT - WARN_BEFORE) {
         setWarning(true);
       }
     }
 
-    // Check every 3 seconds
     const interval = setInterval(tick, 3000);
 
     return () => {
       events.forEach((e) => window.removeEventListener(e, recordActivity));
       document.removeEventListener("visibilitychange", onVisible);
       clearInterval(interval);
-      if (logoutTimer.current) clearTimeout(logoutTimer.current);
-      if (warnTimer.current) clearTimeout(warnTimer.current);
     };
   }, [enabled, warning]);
 
   function staySignedIn() {
-    // Reset the timestamp and hide the warning
     localStorage.setItem(STORAGE_KEY, String(Date.now()));
     setWarning(false);
   }
