@@ -623,6 +623,7 @@ export default function SchedulerPage({ role }) {
     td.cell.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
     td.cell.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
     td.cell.total     { background: #e8f5e9 !important; color: #166534 !important; }
+    td.cell.cell-c3   { background: #5eead4 !important; color: #134e4a !important; }
 
     .legend-code.cell-duty { background: #7dd3fc !important; color: #0c4a6e !important; }
     .legend-code.cell-am   { background: #93c5fd !important; color: #1e3a8a !important; }
@@ -636,6 +637,7 @@ export default function SchedulerPage({ role }) {
     .legend-code.cell-ls   { background: #c4b5fd !important; color: #3b0764 !important; }
     .legend-code.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
     .legend-code.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
+    .legend-code.cell-c3   { background: #5eead4 !important; color: #134e4a !important; }
 
     th.sum-h {
       font-weight: 800;

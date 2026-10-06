@@ -88,6 +88,14 @@ export const STATUSES = [
     time: "",
     classes: "bg-slate-300 text-slate-700",
   },
+
+  {
+  code: "C3",
+  label: "C3",
+  time: "",
+  classes: "bg-teal-500 text-white",
+},
+
 ];
 
 export const STATUS_MAP = Object.fromEntries(STATUSES.map((s) => [s.code, s]));
@@ -97,9 +105,9 @@ export const STATUSES_BY_DEPARTMENT = {
   "H Hotel": ["AM", "PM", "MS", "NS", "G", "9-6", "OFF"],
   "JA Grocery / Pharmacy": ["AM", "PM", "OFF"],
   Wellness: ["DUTY", "OFF"],
-  Johanju: ["DUTY", "OFF"],
+  Johanju: ["9-6", "C3", "OFF"],
   HMC: ["DUTY", "AS", "OFF"],
-  "HMC Laboratory": ["DUTY", "OFF"],
+  "HMC Laboratory": ["AM", "DUTY", "OFF"],
   Hofitea: ["RS", "LS", "ES", "OFF"],
 };
 
