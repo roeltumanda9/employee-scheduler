@@ -1,78 +1,106 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "./supabase";
 
-// Auto sign-out after 15 minutes of inactivity
-const IDLE_TIMEOUT = 15 * 60 * 1000
-// Warn the user 2 minutes before sign-out
-const WARN_BEFORE = Math.min(2 * 60 * 1000, IDLE_TIMEOUT / 2);
+// 30 minutes in milliseconds — change to whatever you want
+const IDLE_TIMEOUT = 15 * 60 * 1000;        // 15 minutes
+const WARN_BEFORE = 2 * 60 * 1000;          // warn 2 min before
+
+// Where we store the last activity timestamp
+const STORAGE_KEY = "hmc_last_activity";
 
 export function useAutoLogout(enabled) {
   const [warning, setWarning] = useState(false);
-
-  const warnTimer = useRef(null);
   const logoutTimer = useRef(null);
-
-  // Use a ref for the "stay signed in" reset trigger.
-  // When this changes, the effect re-runs and resets timers.
-  const [resetTick, setResetTick] = useState(0);
+  const warnTimer = useRef(null);
 
   useEffect(() => {
     if (!enabled) {
       setWarning(false);
-      if (warnTimer.current) clearTimeout(warnTimer.current);
-      if (logoutTimer.current) clearTimeout(logoutTimer.current);
       return;
     }
 
-    // Clear previous timers before scheduling new ones
-    if (warnTimer.current) clearTimeout(warnTimer.current);
-    if (logoutTimer.current) clearTimeout(logoutTimer.current);
-
-    // Schedule the warning
-    warnTimer.current = setTimeout(() => {
-      setWarning(true);
-    }, IDLE_TIMEOUT - WARN_BEFORE);
-
-    // Schedule the sign out
-    logoutTimer.current = setTimeout(async () => {
-      try {
-        await supabase.auth.signOut();
-      } catch (err) {
-        console.error("Auto-logout failed:", err);
+    // --- 1. On mount, check if the user has been away too long ---
+    const stored = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+    if (Number.isFinite(stored)) {
+      const elapsed = Date.now() - stored;
+      if (elapsed >= IDLE_TIMEOUT) {
+        // Too long — sign out immediately
+        supabase.auth.signOut();
+        return;
       }
-    }, IDLE_TIMEOUT);
-
-    // ---- Activity tracking (only active while warning is OFF) ----
-    function onActivity() {
-      if (warning) return; // don't reset while warning is showing
-      setResetTick((t) => t + 1);
+      if (elapsed >= IDLE_TIMEOUT - WARN_BEFORE) {
+        // In the warning window — show the warning
+        setWarning(true);
+      }
+    } else {
+      // First load — set the timestamp
+      localStorage.setItem(STORAGE_KEY, String(Date.now()));
     }
 
-    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "click"];
+    // --- 2. Helper to record activity ---
+    function recordActivity() {
+      // Don't reset while warning is showing — only "Stay signed in" does that
+      if (warning) return;
+      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    }
+
+    // --- 3. Listen for user activity ---
+    const events = [
+      "mousemove",
+      "mousedown",
+      "keydown",
+      "touchstart",
+      "scroll",
+      "click",
+    ];
     events.forEach((e) =>
-      window.addEventListener(e, onActivity, { passive: true })
+      window.addEventListener(e, recordActivity, { passive: true })
     );
 
     function onVisible() {
       if (document.visibilityState === "visible" && !warning) {
-        setResetTick((t) => t + 1);
+        recordActivity();
       }
     }
     document.addEventListener("visibilitychange", onVisible);
 
+    // --- 4. Ticker: every few seconds, check how long it's been ---
+    function tick() {
+      const last = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+      if (!Number.isFinite(last)) {
+        localStorage.setItem(STORAGE_KEY, String(Date.now()));
+        return;
+      }
+
+      const elapsed = Date.now() - last;
+
+      if (elapsed >= IDLE_TIMEOUT) {
+        // Too long — sign out
+        supabase.auth.signOut();
+        return;
+      }
+
+      if (elapsed >= IDLE_TIMEOUT - WARN_BEFORE) {
+        setWarning(true);
+      }
+    }
+
+    // Check every 3 seconds
+    const interval = setInterval(tick, 3000);
+
     return () => {
-      events.forEach((e) => window.removeEventListener(e, onActivity));
+      events.forEach((e) => window.removeEventListener(e, recordActivity));
       document.removeEventListener("visibilitychange", onVisible);
+      clearInterval(interval);
+      if (logoutTimer.current) clearTimeout(logoutTimer.current);
+      if (warnTimer.current) clearTimeout(warnTimer.current);
     };
-    // Rerun whenever:
-    //   - enabled changes
-    //   - warning changes (turn on / off)
-    //   - resetTick changes (user stayed active)
-  }, [enabled, warning, resetTick]);
+  }, [enabled, warning]);
 
   function staySignedIn() {
+    // Reset the timestamp and hide the warning
+    localStorage.setItem(STORAGE_KEY, String(Date.now()));
     setWarning(false);
-    setResetTick((t) => t + 1);
   }
 
   return { warning, staySignedIn };

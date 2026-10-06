@@ -321,6 +321,7 @@ export default function App() {
         }
         onConfirm={() => {
           setConfirmSignOut(false);
+          localStorage.removeItem("hmc_last_activity");
           supabase.auth.signOut();
         }}
         onCancel={() => setConfirmSignOut(false)}
