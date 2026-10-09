@@ -2,18 +2,19 @@
 export const STATUSES = [
   // DUTY — varies per department
   {
-    code: "DUTY",
-    label: "Duty",
-    time: "10:00 AM – 7:00 PM",
-    timeByDepartment: {
-      Amysthetic: "10:00 AM – 7:00 PM",
-      Wellness: "8:00 AM – 5:00 PM",
-      Johanju: "9:00 AM – 6:00 PM",
-      HMC: "8:00 AM – 5:00 PM",
-      "HMC Laboratory": "8:00 AM – 5:00 PM",
-    },
-    classes: "bg-sky-500 text-white",
+  code: "DUTY",
+  label: "Duty",
+  time: "10:00 AM – 7:00 PM",
+  timeByDepartment: {
+    Amysthetic: "10:00 AM – 7:00 PM",
+    "JA Grocery / Pharmacy": "8:00 AM – 5:00 PM",
+    Wellness: "8:00 AM – 5:00 PM",
+    Johanju: "9:00 AM – 6:00 PM",
+    HMC: "8:00 AM – 5:00 PM",
+    "HMC Laboratory": "8:00 AM – 5:00 PM",
   },
+  classes: "bg-sky-500 text-white",
+},
 
  // H Hotel
 {
@@ -111,7 +112,7 @@ export const STATUS_MAP = Object.fromEntries(STATUSES.map((s) => [s.code, s]));
 export const STATUSES_BY_DEPARTMENT = {
   Amysthetic: ["DUTY", "IL", "OFF"],
   "H Hotel": ["AM", "PM", "MS", "NS", "G", "9-6", "IL", "OFF"],
-  "JA Grocery / Pharmacy": ["AM", "PM", "IL", "OFF"],
+  "JA Grocery / Pharmacy": ["AM", "PM", "DUTY", "IL", "OFF"],
   Wellness: ["DUTY", "IL", "OFF"],
   Johanju: ["9-6", "C3", "IL", "OFF"],
   HMC: ["DUTY", "AS", "IL", "OFF"],
