@@ -51,8 +51,14 @@ export default function SchedulerPage({ role }) {
   function monthOffset(delta) {
     let m = todayMonth + delta;
     let y = todayYear;
-    if (m < 1) { m = 12; y -= 1; }
-    if (m > 12) { m = 1; y += 1; }
+    if (m < 1) {
+      m = 12;
+      y -= 1;
+    }
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
     return { year: y, month: m };
   }
 
@@ -62,8 +68,7 @@ export default function SchedulerPage({ role }) {
   function isAllowed(y, m) {
     const key = y * 100 + m;
     return (
-      key >= PREV.year * 100 + PREV.month &&
-      key <= NEXT.year * 100 + NEXT.month
+      key >= PREV.year * 100 + PREV.month && key <= NEXT.year * 100 + NEXT.month
     );
   }
 
@@ -77,8 +82,10 @@ export default function SchedulerPage({ role }) {
     const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
     const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
     if (
-      savedM >= 1 && savedM <= 12 &&
-      savedY >= 2000 && savedY <= 2100 &&
+      savedM >= 1 &&
+      savedM <= 12 &&
+      savedY >= 2000 &&
+      savedY <= 2100 &&
       isAllowed(savedY, savedM)
     ) {
       return savedM;
@@ -90,8 +97,10 @@ export default function SchedulerPage({ role }) {
     const savedM = parseInt(localStorage.getItem("hmc_sched_month"), 10);
     const savedY = parseInt(localStorage.getItem("hmc_sched_year"), 10);
     if (
-      savedM >= 1 && savedM <= 12 &&
-      savedY >= 2000 && savedY <= 2100 &&
+      savedM >= 1 &&
+      savedM <= 12 &&
+      savedY >= 2000 &&
+      savedY <= 2100 &&
       isAllowed(savedY, savedM)
     ) {
       return savedY;
@@ -122,8 +131,18 @@ export default function SchedulerPage({ role }) {
 
   const lastDay = allDays.length ? allDays[allDays.length - 1].day : 30;
   const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const isAllDepts = dept === "all";
@@ -216,7 +235,7 @@ export default function SchedulerPage({ role }) {
 
     setSchedules((prev) => {
       const existing = prev.find(
-        (s) => s.employee_id === employeeId && s.date === iso
+        (s) => s.employee_id === employeeId && s.date === iso,
       );
 
       if (!status) {
@@ -224,9 +243,7 @@ export default function SchedulerPage({ role }) {
       }
 
       if (existing) {
-        return prev.map((s) =>
-          s.id === existing.id ? { ...s, status } : s
-        );
+        return prev.map((s) => (s.id === existing.id ? { ...s, status } : s));
       }
 
       return [
@@ -267,9 +284,7 @@ export default function SchedulerPage({ role }) {
     setPending(newPending);
 
     setSchedules((prev) =>
-      prev.filter(
-        (s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))
-      )
+      prev.filter((s) => !(empIdSet.has(s.employee_id) && daySet.has(s.date))),
     );
   }
 
@@ -289,7 +304,7 @@ export default function SchedulerPage({ role }) {
       const [employeeId, iso] = key.split("|");
 
       const existing = editSnapshot?.find(
-        (s) => s.employee_id === employeeId && s.date === iso
+        (s) => s.employee_id === employeeId && s.date === iso,
       );
 
       if (status === null) {
@@ -340,8 +355,14 @@ export default function SchedulerPage({ role }) {
   function changeMonth(delta) {
     let m = month + delta;
     let y = year;
-    if (m < 1) { m = 12; y -= 1; }
-    if (m > 12) { m = 1; y += 1; }
+    if (m < 1) {
+      m = 12;
+      y -= 1;
+    }
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
     if (!isAllowed(y, m)) return;
     setMonth(m);
     setYear(y);
@@ -372,23 +393,27 @@ export default function SchedulerPage({ role }) {
         <th class="day">
           <div class="weekday">${d.weekday.toUpperCase()}</div>
           <div class="daynum">${d.day}</div>
-        </th>`
+        </th>`,
       )
       .join("");
 
     let grandPresent = 0;
     let grandOff = 0;
+    let grandIL = 0;
     let grandTotalDays = 0;
 
     const rows = visibleEmployees
       .map((emp, i) => {
         let present = 0;
         let off = 0;
+        let il = 0;
 
         const cells = days
           .map((d) => {
             const st = lookup[`${emp.id}|${d.iso}`];
-            if (st && st !== "OFF") present++;
+
+            if (st === "IL") il++;
+            else if (st && st !== "OFF") present++;
             else if (st === "OFF") off++;
 
             let cls = "cell";
@@ -407,6 +432,7 @@ export default function SchedulerPage({ role }) {
         const total = present;
         grandPresent += present;
         grandOff += off;
+        grandIL += il;
         grandTotalDays += total;
 
         return `
@@ -417,6 +443,7 @@ export default function SchedulerPage({ role }) {
               <div class="role">${emp.role}</div>
             </td>
             ${cells}
+            <td class="cell sum il">${il || ""}</td>
             <td class="cell sum present">${present || ""}</td>
             <td class="cell sum off">${off || ""}</td>
             <td class="cell sum total">${total || ""}</td>
@@ -429,7 +456,7 @@ export default function SchedulerPage({ role }) {
         let count = 0;
         for (const emp of visibleEmployees) {
           const st = lookup[`${emp.id}|${d.iso}`];
-          if (st && st !== "OFF") count++;
+          if (st && st !== "OFF" && st !== "IL") count++;
         }
         return `<td class="cell total">${count}</td>`;
       })
@@ -624,6 +651,7 @@ export default function SchedulerPage({ role }) {
     td.cell.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
     td.cell.total     { background: #e8f5e9 !important; color: #166534 !important; }
     td.cell.cell-c3   { background: #5eead4 !important; color: #134e4a !important; }
+        td.cell.cell-il   { background: #a7f3d0 !important; color: #064e3b !important; }
 
     .legend-code.cell-duty { background: #7dd3fc !important; color: #0c4a6e !important; }
     .legend-code.cell-am   { background: #93c5fd !important; color: #1e3a8a !important; }
@@ -638,6 +666,7 @@ export default function SchedulerPage({ role }) {
     .legend-code.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
     .legend-code.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
     .legend-code.cell-c3   { background: #5eead4 !important; color: #134e4a !important; }
+        .legend-code.cell-il   { background: #a7f3d0 !important; color: #064e3b !important; }
 
     th.sum-h {
       font-weight: 800;
@@ -652,6 +681,7 @@ export default function SchedulerPage({ role }) {
     th.sum-h.present-h { background: #dcfce7 !important; color: #166534 !important; }
     th.sum-h.off-h     { background: #ffe4e6 !important; color: #be123c !important; }
     th.sum-h.total-h   { background: #e2e8f0 !important; color: #1e293b !important; }
+        td.sum.il      { background: #ecfdf5 !important; color: #065f46 !important; }
 
     td.sum.present { background: #f0fdf4 !important; color: #166534 !important; }
     td.sum.off     { background: #fff1f2 !important; color: #be123c !important; }
@@ -743,7 +773,7 @@ export default function SchedulerPage({ role }) {
             <span class="legend-text">
               ${s.label}${s.time ? ` — ${s.time}` : ""}
             </span>
-          </span>`
+          </span>`,
           )
           .join("")}
       </div>
@@ -759,19 +789,21 @@ export default function SchedulerPage({ role }) {
     </div>
 
     <table>
-      <colgroup>
-        <col style="width:3.5%" />
-        <col style="width:15%" />
-        ${days.map(() => `<col style="width:3.2%" />`).join("")}
-        <col style="width:7%" />
-        <col style="width:7%" />
-        <col style="width:7%" />
+            <colgroup>
+        <col style="width:3%" />
+        <col style="width:13%" />
+        ${days.map(() => `<col style="width:3%" />`).join("")}
+        <col style="width:6%" />
+        <col style="width:6%" />
+        <col style="width:6%" />
+        <col style="width:6%" />
       </colgroup>
       <thead>
-        <tr>
+                <tr>
           <th class="num-h">#</th>
           <th class="name-h">NAME</th>
           ${dayHeaders}
+          <th class="sum-h il-h">INCENTIVE<br>LEAVE</th>
           <th class="sum-h present-h">PHYSICAL<br>PRESENT</th>
           <th class="sum-h off-h">PHYSICAL<br>OFF</th>
           <th class="sum-h total-h">TOTAL<br>WORKING<br>DAYS</th>
@@ -780,11 +812,12 @@ export default function SchedulerPage({ role }) {
       <tbody>
         ${rows}
       </tbody>
-      <tfoot>
+            <tfoot>
         <tr>
           <td class="num"></td>
           <td class="name">TOTAL MANPOWER OF THE DAY</td>
           ${dailyTotals}
+          <td class="sum il">${grandIL}</td>
           <td class="sum present">${grandPresent}</td>
           <td class="sum off">${grandOff}</td>
           <td class="sum total">${grandTotalDays}</td>
@@ -796,11 +829,13 @@ export default function SchedulerPage({ role }) {
       <div class="sig">
         <div class="label-top">Prepared by:</div>
         <div class="sign-space"></div>
-        ${prepared
-          ? `<div class="name">${prepared.name}</div>
+        ${
+          prepared
+            ? `<div class="name">${prepared.name}</div>
              <div class="title">${prepared.title}</div>`
-          : `<div class="name">&nbsp;</div>
-             <div class="title">&nbsp;</div>`}
+            : `<div class="name">&nbsp;</div>
+             <div class="title">&nbsp;</div>`
+        }
       </div>
       <div class="sig">
         <div class="label-top">Checked by:</div>
@@ -842,8 +877,8 @@ export default function SchedulerPage({ role }) {
             : new Promise((res) => {
                 img.onload = res;
                 img.onerror = res;
-              })
-        )
+              }),
+        ),
       );
 
     const ready = () => {
@@ -874,11 +909,9 @@ export default function SchedulerPage({ role }) {
 
   const isCurrentMonth = month === todayMonth && year === todayYear;
   const isPrevMonth =
-    !isCurrentMonth &&
-    (year * 100 + month) < (todayYear * 100 + todayMonth);
+    !isCurrentMonth && year * 100 + month < todayYear * 100 + todayMonth;
   const isNextMonth =
-    !isCurrentMonth &&
-    (year * 100 + month) > (todayYear * 100 + todayMonth);
+    !isCurrentMonth && year * 100 + month > todayYear * 100 + todayMonth;
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -887,16 +920,30 @@ export default function SchedulerPage({ role }) {
           {/* MONTH */}
           <div className="flex flex-col items-center w-full sm:flex-1 sm:min-w-[340px] sm:w-auto">
             <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
-              {isCurrentMonth ? "Current Month" : isPrevMonth ? "Previous Month" : "Next Month"}
+              {isCurrentMonth
+                ? "Current Month"
+                : isPrevMonth
+                  ? "Previous Month"
+                  : "Next Month"}
             </div>
             <div className="flex items-center justify-center gap-2 sm:gap-5 h-12 sm:h-16 w-full">
               <button
                 onClick={() => changeMonth(-1)}
                 disabled={!canGoPrev()}
                 className="w-10 h-10 sm:w-14 sm:h-14 grid place-items-center rounded-xl sm:rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm sm:shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
-                title={canGoPrev() ? "Previous month" : "No earlier months available"}
+                title={
+                  canGoPrev() ? "Previous month" : "No earlier months available"
+                }
               >
-                <svg className="w-5 h-5 sm:w-7 sm:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  className="w-5 h-5 sm:w-7 sm:h-7"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
@@ -913,7 +960,15 @@ export default function SchedulerPage({ role }) {
                 className="w-10 h-10 sm:w-14 sm:h-14 grid place-items-center rounded-xl sm:rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm sm:shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
                 title={canGoNext() ? "Next month" : "No later months available"}
               >
-                <svg className="w-5 h-5 sm:w-7 sm:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  className="w-5 h-5 sm:w-7 sm:h-7"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </button>
@@ -971,7 +1026,15 @@ export default function SchedulerPage({ role }) {
                   className="inline-flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 h-11 sm:h-16 w-full sm:w-auto text-sm sm:text-base font-black text-white bg-gradient-to-br from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 active:scale-95 shadow-sm sm:shadow-md shadow-amber-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-xl sm:rounded-2xl transition"
                   title="Enable editing"
                 >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M12 20h9" />
                     <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
                   </svg>
@@ -1000,7 +1063,15 @@ export default function SchedulerPage({ role }) {
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          className="w-4 h-4 sm:w-5 sm:h-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
                         SAVE
@@ -1037,9 +1108,21 @@ export default function SchedulerPage({ role }) {
                   onClick={askClearHalf}
                   disabled={isAllDepts || visibleEmployees.length === 0}
                   className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 h-full flex-1 sm:flex-none text-xs sm:text-sm font-medium rounded-xl sm:rounded-2xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                  title={isAllDepts ? "Not available in preview mode" : "Clear this half"}
+                  title={
+                    isAllDepts
+                      ? "Not available in preview mode"
+                      : "Clear this half"
+                  }
                 >
-                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <polyline points="3 6 5 6 21 6" />
                     <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                     <path d="M10 11v6" />
@@ -1055,7 +1138,15 @@ export default function SchedulerPage({ role }) {
                 className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 h-full flex-1 sm:flex-none text-xs sm:text-sm font-semibold rounded-xl sm:rounded-2xl border border-green-200 text-green-700 bg-white hover:bg-green-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
                 title="Print this schedule"
               >
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="6 9 6 2 18 2 18 9" />
                   <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                   <rect x="6" y="14" width="12" height="8" />
@@ -1069,12 +1160,21 @@ export default function SchedulerPage({ role }) {
 
       {editing && (
         <div className="bg-amber-50 ring-1 ring-amber-200 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-3 text-xs sm:text-sm text-amber-800">
-          <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            className="w-4 h-4 sm:w-5 sm:h-5 shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
           </svg>
           <span className="flex-1">
-            <strong>Editing mode</strong> — changes aren't saved until you click <strong>Save</strong>.
+            <strong>Editing mode</strong> — changes aren't saved until you click{" "}
+            <strong>Save</strong>.
           </span>
           <button
             onClick={cancelEdit}
@@ -1111,7 +1211,10 @@ export default function SchedulerPage({ role }) {
 
             <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 sm:gap-y-3">
               {legendShifts.map((s) => (
-                <div key={s.code} className="inline-flex items-center gap-2 sm:gap-3">
+                <div
+                  key={s.code}
+                  className="inline-flex items-center gap-2 sm:gap-3"
+                >
                   <span
                     className={`inline-flex items-center justify-center min-w-[44px] sm:min-w-[56px] h-8 sm:h-10 rounded-md sm:rounded-lg px-2 sm:px-3 text-xs sm:text-sm font-black tracking-wide shadow-sm ${s.classes}`}
                   >
@@ -1173,7 +1276,15 @@ export default function SchedulerPage({ role }) {
             <div className="p-5 sm:p-6">
               <div className="flex items-start gap-4">
                 <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-rose-50 ring-1 ring-rose-100 grid place-items-center shrink-0">
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-rose-600"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                     <line x1="12" y1="9" x2="12" y2="13" />
                     <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -1190,7 +1301,11 @@ export default function SchedulerPage({ role }) {
                     <strong className="text-slate-700">
                       {months[month - 1]} {year}
                     </strong>{" "}
-                    ({half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`}).
+                    (
+                    {half === 1
+                      ? "1st Half (1–15)"
+                      : `2nd Half (16–${lastDay})`}
+                    ).
                   </p>
                   <p className="text-xs text-rose-600 font-medium mt-2">
                     Changes are still pending until you click Save.
@@ -1210,7 +1325,16 @@ export default function SchedulerPage({ role }) {
                 onClick={confirmClearHalf}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-rose-600 rounded-xl hover:bg-rose-700 active:scale-95 shadow-sm shadow-rose-200 transition"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                 </svg>
@@ -1284,7 +1408,9 @@ function DepartmentDropdown({ value, onChange }) {
             <path d="M5 21V7l7-4 7 4v14" />
             <path d="M9 21v-6h6v6" />
           </svg>
-          <span className={`truncate ${isAll ? "text-green-700 font-semibold" : "text-slate-800"}`}>
+          <span
+            className={`truncate ${isAll ? "text-green-700 font-semibold" : "text-slate-800"}`}
+          >
             {label}
           </span>
         </span>

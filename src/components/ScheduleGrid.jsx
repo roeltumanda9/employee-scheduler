@@ -43,17 +43,19 @@ export default function ScheduleGrid({
     let count = 0;
     for (const emp of employees) {
       const st = lookup[`${emp.id}|${d.iso}`]?.status;
-      if (st && st !== "OFF") count++;
+      if (st && st !== "OFF" && st !== "IL") count++;
     }
     dailyManpower[d.iso] = count;
   }
 
   let grandPresent = 0;
   let grandOff = 0;
+  let grandIL = 0;
   for (const emp of employees) {
     for (const d of days) {
       const st = lookup[`${emp.id}|${d.iso}`]?.status;
-      if (st && st !== "OFF") grandPresent++;
+      if (st === "IL") grandIL++;
+      else if (st && st !== "OFF") grandPresent++;
       else if (st === "OFF") grandOff++;
     }
   }
@@ -68,6 +70,7 @@ export default function ScheduleGrid({
             {days.map((d) => (
               <col key={d.iso} style={{ width: z.dayW }} />
             ))}
+            <col style={{ width: z.summaryW }} />
             <col style={{ width: z.summaryW }} />
             <col style={{ width: z.summaryW }} />
             <col style={{ width: z.summaryW }} />
@@ -110,7 +113,13 @@ export default function ScheduleGrid({
                   </th>
                 );
               })}
-
+              <th className="sticky z-20 bg-emerald-50 border-b border-r border-slate-200 px-1 py-2 text-center">
+                <div className="text-[10px] uppercase tracking-wider text-emerald-800 font-bold leading-tight">
+                  Incentive
+                  <br />
+                  Leave
+                </div>
+              </th>
               <th className="sticky z-20 bg-emerald-50 border-b border-r border-slate-200 px-1 py-2 text-center">
                 <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-bold leading-tight">
                   Physical
@@ -139,9 +148,11 @@ export default function ScheduleGrid({
             {employees.map((emp, idx) => {
               let present = 0;
               let off = 0;
+              let il = 0;
               for (const d of days) {
                 const st = lookup[`${emp.id}|${d.iso}`]?.status;
-                if (st && st !== "OFF") present++;
+                if (st === "IL") il++;
+                else if (st && st !== "OFF") present++;
                 else if (st === "OFF") off++;
               }
               const total = present;
@@ -207,7 +218,14 @@ export default function ScheduleGrid({
                       </td>
                     );
                   })}
-
+                  <td
+                    className={`sticky z-10 ${rowBg} ${hoverBg} border-b border-r border-slate-200 px-1 py-2 text-center transition-colors`}
+                  >
+                    <SummaryNumber
+                      value={il}
+                      className={`text-emerald-800 ${z.summaryText}`}
+                    />
+                  </td>
                   <td
                     className={`sticky z-10 ${rowBg} ${hoverBg} border-b border-r border-slate-200 px-1 py-2 text-center transition-colors`}
                   >
@@ -290,7 +308,11 @@ export default function ScheduleGrid({
                   </td>
                 );
               })}
-
+              <td className="sticky z-20 bg-emerald-50 border-t-2 border-green-200 border-r border-slate-200 py-2 text-center">
+                <span className={`font-bold text-emerald-800 ${z.totalText}`}>
+                  {grandIL}
+                </span>
+              </td>
               <td className="sticky z-20 bg-emerald-50 border-t-2 border-green-200 border-r border-slate-200 py-2 text-center">
                 <span className={`font-bold text-emerald-700 ${z.totalText}`}>
                   {grandPresent}

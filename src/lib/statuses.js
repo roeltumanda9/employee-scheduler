@@ -89,6 +89,14 @@ export const STATUSES = [
     classes: "bg-slate-300 text-slate-700",
   },
 
+    // Incentive Leave
+  {
+    code: "IL",
+    label: "Incentive Leave",
+    time: "",
+    classes: "bg-emerald-200 text-emerald-900",
+  },
+
   {
   code: "C3",
   label: "C3",
@@ -101,14 +109,14 @@ export const STATUSES = [
 export const STATUS_MAP = Object.fromEntries(STATUSES.map((s) => [s.code, s]));
 
 export const STATUSES_BY_DEPARTMENT = {
-  Amysthetic: ["DUTY", "OFF"],
-  "H Hotel": ["AM", "PM", "MS", "NS", "G", "9-6", "OFF"],
-  "JA Grocery / Pharmacy": ["AM", "PM", "OFF"],
-  Wellness: ["DUTY", "OFF"],
-  Johanju: ["9-6", "C3", "OFF"],
-  HMC: ["DUTY", "AS", "OFF"],
-  "HMC Laboratory": ["AM", "DUTY", "OFF"],
-  Hofitea: ["RS", "LS", "ES", "OFF"],
+  Amysthetic: ["DUTY", "IL", "OFF"],
+  "H Hotel": ["AM", "PM", "MS", "NS", "G", "9-6", "IL", "OFF"],
+  "JA Grocery / Pharmacy": ["AM", "PM", "IL", "OFF"],
+  Wellness: ["DUTY", "IL", "OFF"],
+  Johanju: ["9-6", "C3", "IL", "OFF"],
+  HMC: ["DUTY", "AS", "IL", "OFF"],
+  "HMC Laboratory": ["AM", "DUTY", "IL", "OFF"],
+  Hofitea: ["RS", "LS", "ES", "IL", "OFF"],
 };
 
 export function statusesForDepartment(department) {
