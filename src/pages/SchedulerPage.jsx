@@ -651,7 +651,7 @@ export default function SchedulerPage({ role }) {
     td.cell.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
     td.cell.total     { background: #e8f5e9 !important; color: #166534 !important; }
     td.cell.cell-c3   { background: #5eead4 !important; color: #134e4a !important; }
-        td.cell.cell-il   { background: #a7f3d0 !important; color: #064e3b !important; }
+    td.cell.cell-il   { background: #a7f3d0 !important; color: #064e3b !important; }
 
     .legend-code.cell-duty { background: #7dd3fc !important; color: #0c4a6e !important; }
     .legend-code.cell-am   { background: #93c5fd !important; color: #1e3a8a !important; }
@@ -666,7 +666,7 @@ export default function SchedulerPage({ role }) {
     .legend-code.cell-es   { background: #f0abfc !important; color: #581c87 !important; }
     .legend-code.cell-off  { background: #e2e8f0 !important; color: #334155 !important; }
     .legend-code.cell-c3   { background: #5eead4 !important; color: #134e4a !important; }
-        .legend-code.cell-il   { background: #a7f3d0 !important; color: #064e3b !important; }
+    .legend-code.cell-il   { background: #a7f3d0 !important; color: #064e3b !important; }
 
     th.sum-h {
       font-weight: 800;
@@ -678,11 +678,12 @@ export default function SchedulerPage({ role }) {
     }
     td.sum { font-weight: 800; font-size: 9pt; padding: 1px 2px; }
 
+    th.sum-h.il-h      { background: #d1fae5 !important; color: #065f46 !important; }
     th.sum-h.present-h { background: #dcfce7 !important; color: #166534 !important; }
     th.sum-h.off-h     { background: #ffe4e6 !important; color: #be123c !important; }
     th.sum-h.total-h   { background: #e2e8f0 !important; color: #1e293b !important; }
-        td.sum.il      { background: #ecfdf5 !important; color: #065f46 !important; }
 
+    td.sum.il      { background: #ecfdf5 !important; color: #065f46 !important; }
     td.sum.present { background: #f0fdf4 !important; color: #166534 !important; }
     td.sum.off     { background: #fff1f2 !important; color: #be123c !important; }
     td.sum.total   { background: #f1f5f9 !important; color: #1e293b !important; }
@@ -699,6 +700,7 @@ export default function SchedulerPage({ role }) {
       letter-spacing: 0.4px;
     }
     tfoot td.sum { background: #d1fae5 !important; font-weight: 800; }
+    tfoot td.sum.il { background: #d1fae5 !important; }
     tfoot td.sum.off { background: #ffe4e6 !important; }
     tfoot td.sum.total { background: #e2e8f0 !important; }
 
@@ -789,7 +791,7 @@ export default function SchedulerPage({ role }) {
     </div>
 
     <table>
-            <colgroup>
+      <colgroup>
         <col style="width:3%" />
         <col style="width:13%" />
         ${days.map(() => `<col style="width:3%" />`).join("")}
@@ -799,7 +801,7 @@ export default function SchedulerPage({ role }) {
         <col style="width:6%" />
       </colgroup>
       <thead>
-                <tr>
+        <tr>
           <th class="num-h">#</th>
           <th class="name-h">NAME</th>
           ${dayHeaders}
@@ -812,7 +814,7 @@ export default function SchedulerPage({ role }) {
       <tbody>
         ${rows}
       </tbody>
-            <tfoot>
+      <tfoot>
         <tr>
           <td class="num"></td>
           <td class="name">TOTAL MANPOWER OF THE DAY</td>
@@ -914,29 +916,29 @@ export default function SchedulerPage({ role }) {
     !isCurrentMonth && year * 100 + month > todayYear * 100 + todayMonth;
 
   return (
-    <div className="space-y-4 sm:space-y-5">
-      <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 px-3 sm:px-6 pt-2 pb-2 sm:pb-3 bg-slate-100/80 backdrop-blur border-b border-slate-200">
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-3 sm:p-5 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3 sm:gap-4">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 px-3 sm:px-6 pt-2 pb-2 bg-slate-100/80 backdrop-blur border-b border-slate-200">
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-3 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3">
           {/* MONTH */}
-          <div className="flex flex-col items-center w-full sm:flex-1 sm:min-w-[340px] sm:w-auto">
-            <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
+          <div className="flex flex-col items-center w-full sm:flex-1 sm:min-w-[300px] sm:w-auto">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-green-700 font-bold mb-1">
               {isCurrentMonth
                 ? "Current Month"
                 : isPrevMonth
                   ? "Previous Month"
                   : "Next Month"}
             </div>
-            <div className="flex items-center justify-center gap-2 sm:gap-5 h-12 sm:h-16 w-full">
+            <div className="flex items-center justify-center gap-2 sm:gap-3 h-11 sm:h-12 w-full">
               <button
                 onClick={() => changeMonth(-1)}
                 disabled={!canGoPrev()}
-                className="w-10 h-10 sm:w-14 sm:h-14 grid place-items-center rounded-xl sm:rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm sm:shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
+                className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 grid place-items-center rounded-xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
                 title={
                   canGoPrev() ? "Previous month" : "No earlier months available"
                 }
               >
                 <svg
-                  className="w-5 h-5 sm:w-7 sm:h-7"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -948,8 +950,8 @@ export default function SchedulerPage({ role }) {
                 </svg>
               </button>
 
-              <div className="text-center flex-1 sm:flex-none sm:min-w-[260px]">
-                <div className="text-xl xs:text-2xl sm:text-5xl font-black text-green-800 tracking-tight leading-none">
+              <div className="text-center flex-1 sm:flex-none sm:min-w-[200px]">
+                <div className="text-lg sm:text-xl md:text-2xl font-black text-green-800 tracking-tight leading-none">
                   {months[month - 1]} {year}
                 </div>
               </div>
@@ -957,11 +959,11 @@ export default function SchedulerPage({ role }) {
               <button
                 onClick={() => changeMonth(1)}
                 disabled={!canGoNext()}
-                className="w-10 h-10 sm:w-14 sm:h-14 grid place-items-center rounded-xl sm:rounded-2xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm sm:shadow-md shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
+                className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 grid place-items-center rounded-xl text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm shadow-green-200 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none disabled:from-slate-200 disabled:to-slate-300 disabled:text-slate-400 shrink-0"
                 title={canGoNext() ? "Next month" : "No later months available"}
               >
                 <svg
-                  className="w-5 h-5 sm:w-7 sm:h-7"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -975,19 +977,19 @@ export default function SchedulerPage({ role }) {
             </div>
           </div>
 
-          <div className="hidden xl:block h-16 w-px bg-slate-200" />
+          <div className="hidden xl:block h-12 w-px bg-slate-200" />
 
           {/* PERIOD */}
           <div className="flex flex-col items-center w-full sm:w-auto">
-            <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-green-700 font-bold mb-1">
               Period
             </div>
-            <div className="inline-flex rounded-xl sm:rounded-2xl bg-slate-100 p-1 sm:p-1.5 h-11 sm:h-16 items-center shadow-inner w-full sm:w-auto justify-center">
+            <div className="inline-flex rounded-xl bg-slate-100 p-1 h-11 sm:h-12 items-center shadow-inner w-full sm:w-auto justify-center">
               <button
                 onClick={() => setHalf(1)}
-                className={`px-3 sm:px-5 h-full text-xs sm:text-base font-bold rounded-lg sm:rounded-xl transition flex-1 sm:flex-none ${
+                className={`px-3 sm:px-4 h-full text-xs sm:text-sm font-bold rounded-lg transition flex-1 sm:flex-none ${
                   half === 1
-                    ? "bg-white text-green-700 shadow-sm sm:shadow-md"
+                    ? "bg-white text-green-700 shadow-sm"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -995,9 +997,9 @@ export default function SchedulerPage({ role }) {
               </button>
               <button
                 onClick={() => setHalf(2)}
-                className={`px-3 sm:px-5 h-full text-xs sm:text-base font-bold rounded-lg sm:rounded-xl transition flex-1 sm:flex-none ${
+                className={`px-3 sm:px-4 h-full text-xs sm:text-sm font-bold rounded-lg transition flex-1 sm:flex-none ${
                   half === 2
-                    ? "bg-white text-green-700 shadow-sm sm:shadow-md"
+                    ? "bg-white text-green-700 shadow-sm"
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
@@ -1006,12 +1008,12 @@ export default function SchedulerPage({ role }) {
             </div>
           </div>
 
-          <div className="hidden xl:block h-16 w-px bg-slate-200" />
+          <div className="hidden xl:block h-12 w-px bg-slate-200" />
 
           {/* ACTIONS */}
           {canEdit && !isAllDepts && (
             <div className="flex flex-col items-center w-full sm:w-auto">
-              <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-green-700 font-bold mb-1">
                 {editing ? "Editing" : "Actions"}
               </div>
 
@@ -1023,11 +1025,11 @@ export default function SchedulerPage({ role }) {
                     setEditing(true);
                   }}
                   disabled={visibleEmployees.length === 0}
-                  className="inline-flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 h-11 sm:h-16 w-full sm:w-auto text-sm sm:text-base font-black text-white bg-gradient-to-br from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 active:scale-95 shadow-sm sm:shadow-md shadow-amber-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-xl sm:rounded-2xl transition"
+                  className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 h-11 sm:h-12 w-full sm:w-auto text-xs sm:text-sm font-black text-white bg-gradient-to-br from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 active:scale-95 shadow-sm shadow-amber-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-xl transition"
                   title="Enable editing"
                 >
                   <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -1041,11 +1043,11 @@ export default function SchedulerPage({ role }) {
                   EDIT
                 </button>
               ) : (
-                <div className="flex items-center gap-2 sm:gap-3 h-11 sm:h-16 w-full sm:w-auto">
+                <div className="flex items-center gap-2 h-11 sm:h-12 w-full sm:w-auto">
                   <button
                     onClick={cancelEdit}
                     disabled={saving}
-                    className="inline-flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-5 h-full flex-1 sm:flex-none text-sm sm:text-base font-black text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 active:scale-95 disabled:opacity-40 rounded-xl sm:rounded-2xl transition"
+                    className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 h-full flex-1 sm:flex-none text-xs sm:text-sm font-black text-slate-700 bg-white border-2 border-slate-200 hover:bg-slate-50 active:scale-95 disabled:opacity-40 rounded-xl transition"
                     title="Discard changes"
                   >
                     CANCEL
@@ -1053,18 +1055,18 @@ export default function SchedulerPage({ role }) {
                   <button
                     onClick={saveEdits}
                     disabled={saving || Object.keys(pending).length === 0}
-                    className="inline-flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 h-full flex-1 sm:flex-none text-sm sm:text-base font-black text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm sm:shadow-md shadow-green-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-xl sm:rounded-2xl transition"
+                    className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 h-full flex-1 sm:flex-none text-xs sm:text-sm font-black text-white bg-gradient-to-br from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 active:scale-95 shadow-sm shadow-green-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none rounded-xl transition"
                     title="Save changes"
                   >
                     {saving ? (
                       <>
-                        <span className="w-4 h-4 sm:w-5 sm:h-5 border-2 sm:border-[3px] border-white/40 border-t-white rounded-full animate-spin" />
+                        <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                         SAVING…
                       </>
                     ) : (
                       <>
                         <svg
-                          className="w-4 h-4 sm:w-5 sm:h-5"
+                          className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -1083,35 +1085,35 @@ export default function SchedulerPage({ role }) {
             </div>
           )}
 
-          <div className="hidden xl:block h-16 w-px bg-slate-200" />
+          <div className="hidden xl:block h-12 w-px bg-slate-200" />
 
           {/* DEPARTMENT */}
           <div className="flex flex-col items-center w-full sm:w-auto">
-            <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-green-700 font-bold mb-1">
               Department
             </div>
-            <div className="h-11 sm:h-16 flex items-stretch w-full sm:w-auto">
+            <div className="h-11 sm:h-12 flex items-stretch w-full sm:w-auto">
               <DepartmentDropdown value={dept} onChange={setDept} />
             </div>
           </div>
 
-          <div className="hidden xl:block h-16 w-px bg-slate-200" />
+          <div className="hidden xl:block h-12 w-px bg-slate-200" />
 
           {/* TOOLS */}
           <div className="flex flex-col items-center w-full sm:w-auto">
-            <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-green-700 font-bold mb-1 sm:mb-2">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-green-700 font-bold mb-1">
               Tools
             </div>
-            <div className="flex items-center gap-2 h-11 sm:h-16 w-full sm:w-auto">
+            <div className="flex items-center gap-2 h-11 sm:h-12 w-full sm:w-auto">
               {canEdit && editing && (
                 <button
                   onClick={askClearHalf}
                   disabled={isAllDepts || visibleEmployees.length === 0}
-                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 h-full flex-1 sm:flex-none text-xs sm:text-sm font-medium rounded-xl sm:rounded-2xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 h-full flex-1 sm:flex-none text-xs sm:text-sm font-medium rounded-xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
                   title={
                     isAllDepts
                       ? "Not available in preview mode"
-                      : "Clear this half"
+                      : "Clear this period"
                   }
                 >
                   <svg
@@ -1132,36 +1134,38 @@ export default function SchedulerPage({ role }) {
                 </button>
               )}
 
-              <button
-                onClick={handlePrint}
-                disabled={visibleEmployees.length === 0 || editing}
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 h-full flex-1 sm:flex-none text-xs sm:text-sm font-semibold rounded-xl sm:rounded-2xl border border-green-200 text-green-700 bg-white hover:bg-green-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                title="Print this schedule"
-              >
-                <svg
-                  className="w-3.5 h-3.5 sm:w-4 sm:h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+              {!editing && (
+                <button
+                  onClick={handlePrint}
+                  disabled={visibleEmployees.length === 0}
+                  className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 h-full flex-1 sm:flex-none text-xs sm:text-sm font-semibold rounded-xl border border-green-200 text-green-700 bg-white hover:bg-green-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  title="Print this schedule"
                 >
-                  <polyline points="6 9 6 2 18 2 18 9" />
-                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                  <rect x="6" y="14" width="12" height="8" />
-                </svg>
-                Print
-              </button>
+                  <svg
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 6 2 18 2 18 9" />
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                    <rect x="6" y="14" width="12" height="8" />
+                  </svg>
+                  Print
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {editing && (
-        <div className="bg-amber-50 ring-1 ring-amber-200 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-3 text-xs sm:text-sm text-amber-800">
+        <div className="bg-amber-50 ring-1 ring-amber-200 rounded-2xl px-3 sm:px-4 py-2 flex items-center gap-3 text-xs sm:text-sm text-amber-800 max-w-6xl mx-auto w-full">
           <svg
-            className="w-4 h-4 sm:w-5 sm:h-5 shrink-0"
+            className="w-4 h-4 shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -1178,7 +1182,7 @@ export default function SchedulerPage({ role }) {
           </span>
           <button
             onClick={cancelEdit}
-            className="text-[11px] sm:text-xs font-semibold text-amber-900 underline hover:no-underline"
+            className="text-[11px] font-semibold text-amber-900 underline hover:no-underline"
           >
             Discard
           </button>
@@ -1187,21 +1191,21 @@ export default function SchedulerPage({ role }) {
 
       {/* Stats row */}
       <div className="flex flex-col sm:flex-row items-stretch gap-3">
-        <div className="w-full sm:w-[220px] sm:shrink-0 flex">
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-4 py-3 sm:px-6 sm:py-5 w-full flex flex-col items-center justify-center text-center">
-            <div className="text-[10px] sm:text-xs uppercase tracking-widest text-green-700 font-bold">
+        <div className="w-full sm:w-[180px] sm:shrink-0 flex">
+          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-4 py-3 w-full flex flex-col items-center justify-center text-center">
+            <div className="text-[10px] uppercase tracking-widest text-green-700 font-bold">
               Employees
             </div>
-            <div className="mt-1 sm:mt-2 text-4xl sm:text-6xl font-black text-green-800 leading-none">
+            <div className="mt-1 text-3xl sm:text-4xl font-black text-green-800 leading-none">
               {visibleEmployees.length}
             </div>
           </div>
         </div>
 
         {!isAllDepts && legendShifts.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-4 py-3 sm:px-6 sm:py-5 flex-1">
-            <div className="flex items-baseline justify-between mb-3 sm:mb-4">
-              <div className="text-[10px] sm:text-xs uppercase tracking-widest text-green-700 font-bold">
+          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 px-4 py-3 sm:px-5 sm:py-4 flex-1">
+            <div className="flex items-baseline justify-between mb-2 sm:mb-3">
+              <div className="text-[10px] uppercase tracking-widest text-green-700 font-bold">
                 Shifts
               </div>
               <div className="text-xs sm:text-sm font-bold text-slate-700">
@@ -1209,23 +1213,20 @@ export default function SchedulerPage({ role }) {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 sm:gap-y-3">
+            <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-2">
               {legendShifts.map((s) => (
-                <div
-                  key={s.code}
-                  className="inline-flex items-center gap-2 sm:gap-3"
-                >
+                <div key={s.code} className="inline-flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center justify-center min-w-[44px] sm:min-w-[56px] h-8 sm:h-10 rounded-md sm:rounded-lg px-2 sm:px-3 text-xs sm:text-sm font-black tracking-wide shadow-sm ${s.classes}`}
+                    className={`inline-flex items-center justify-center min-w-[40px] sm:min-w-[48px] h-7 sm:h-8 rounded-md px-2 text-xs font-black tracking-wide shadow-sm ${s.classes}`}
                   >
                     {s.code}
                   </span>
                   <div className="flex flex-col leading-tight">
-                    <span className="text-xs sm:text-sm font-bold text-slate-800 whitespace-nowrap">
+                    <span className="text-xs font-bold text-slate-800 whitespace-nowrap">
                       {s.label}
                     </span>
                     {s.time && (
-                      <span className="text-[10px] sm:text-xs text-slate-500 whitespace-nowrap">
+                      <span className="text-[10px] text-slate-500 whitespace-nowrap">
                         {s.time}
                       </span>
                     )}
@@ -1238,12 +1239,12 @@ export default function SchedulerPage({ role }) {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-12 text-center">
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-12 text-center max-w-6xl mx-auto w-full">
           <div className="inline-block w-6 h-6 border-2 border-slate-300 border-t-green-600 rounded-full animate-spin" />
           <p className="mt-3 text-sm text-slate-500">Loading schedule…</p>
         </div>
       ) : visibleEmployees.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-12 text-center">
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-12 text-center max-w-6xl mx-auto w-full">
           <div className="text-4xl">👥</div>
           <p className="mt-3 text-sm font-medium text-slate-700">
             No employees in {isAllDepts ? "any department" : dept}
@@ -1386,7 +1387,7 @@ function DepartmentDropdown({ value, onChange }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex items-center gap-2 rounded-xl sm:rounded-2xl border px-3 sm:px-4 h-full text-xs sm:text-base font-bold transition w-full sm:min-w-[220px] sm:w-auto justify-between ${
+        className={`inline-flex items-center gap-2 rounded-xl border px-3 sm:px-4 h-full text-xs sm:text-sm font-bold transition w-full sm:min-w-[200px] sm:w-auto justify-between ${
           open
             ? "border-green-500 ring-2 ring-green-100 bg-white"
             : "border-slate-200 bg-slate-50/60 hover:bg-white"
