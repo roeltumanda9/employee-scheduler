@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { getDaysInMonth } from "../lib/dates";
+import { getPayrollPeriodDays } from "../lib/dates";
 import { DEPARTMENTS } from "../lib/departments";
 import ScheduleGrid from "../components/ScheduleGrid";
+
 import {
   STATUS_MAP,
   STATUSES_BY_DEPARTMENT,
@@ -122,14 +123,6 @@ export default function SchedulerPage({ role }) {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const allDays = useMemo(() => getDaysInMonth(year, month), [year, month]);
-
-  const days = useMemo(() => {
-    if (half === 1) return allDays.filter((d) => d.day <= 15);
-    return allDays.filter((d) => d.day > 15);
-  }, [allDays, half]);
-
-  const lastDay = allDays.length ? allDays[allDays.length - 1].day : 30;
   const months = [
     "January",
     "February",
@@ -146,6 +139,11 @@ export default function SchedulerPage({ role }) {
   ];
 
   const isAllDepts = dept === "all";
+
+  const days = useMemo(
+    () => getPayrollPeriodDays(year, month, half),
+    [year, month, half],
+  );
 
   const legendShifts = useMemo(() => {
     if (isAllDepts) return [];
@@ -168,18 +166,17 @@ export default function SchedulerPage({ role }) {
 
   async function load() {
     setLoading(true);
-    const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
-    const nextMonth = month === 12 ? 1 : month + 1;
-    const nextYear = month === 12 ? year + 1 : year;
-    const monthEnd = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+
+    const firstIso = days[0]?.iso;
+    const lastIso = days[days.length - 1]?.iso;
 
     const [empRes, schRes] = await Promise.all([
       supabase.from("employees").select("*").order("name"),
       supabase
         .from("schedules")
         .select("*")
-        .gte("date", monthStart)
-        .lt("date", monthEnd),
+        .gte("date", firstIso)
+        .lte("date", lastIso),
     ]);
 
     if (empRes.error) alert(empRes.error.message);
@@ -194,7 +191,7 @@ export default function SchedulerPage({ role }) {
   useEffect(() => {
     load();
     // eslint-disable-next-line
-  }, [month, year]);
+  }, [month, year, half]);
 
   useEffect(() => {
     localStorage.setItem("hmc_sched_month", String(month));
@@ -382,6 +379,22 @@ export default function SchedulerPage({ role }) {
   function handlePrint() {
     const deptLabel = isAllDepts ? "All Departments" : dept;
 
+    // Build "September – October 2026" or "October 2026"
+    const rangeTitle = (() => {
+      const first = days[0];
+      const last = days[days.length - 1];
+      if (!first || !last) return `${months[month - 1]} ${year}`;
+      const firstDate = new Date(first.iso);
+      const lastDate = new Date(last.iso);
+      const fm = firstDate.getMonth();
+      const lm = lastDate.getMonth();
+      const fy = firstDate.getFullYear();
+      const ly = lastDate.getFullYear();
+      if (fm === lm && fy === ly) return `${months[fm]} ${fy}`;
+      if (fy === ly) return `${months[fm]} – ${months[lm]} ${fy}`;
+      return `${months[fm]} ${fy} – ${months[lm]} ${ly}`;
+    })();
+
     const lookup = {};
     for (const s of schedules) {
       lookup[`${s.employee_id}|${s.date}`] = s.status;
@@ -463,9 +476,17 @@ export default function SchedulerPage({ role }) {
       .join("");
 
     const halfLabel =
-      half === 1 ? "1st Half (1–15)" : `2nd Half (16–${lastDay})`;
+      half === 1 ? "1st Period (27 – 11)" : "2nd Period (12 – 26)";
 
-    const prepared = isAllDepts ? null : PREPARED_BY[dept] || null;
+    const DEFAULT_PREPARED = {
+      name: "LORRAINE JANE L. DUNKEN",
+      title: "OIC-Manager",
+    };
+
+    // ...inside handlePrint:
+    const prepared = isAllDepts
+      ? DEFAULT_PREPARED
+      : PREPARED_BY[dept] || DEFAULT_PREPARED;
 
     const usedCodes = new Set();
     const halfDaySetLocal = new Set(days.map((d) => d.iso));
@@ -756,7 +777,7 @@ export default function SchedulerPage({ role }) {
     </div>
 
     <div class="infobar">
-      <div class="month-title">${months[month - 1]} ${year}</div>
+      <div class="month-title">${rangeTitle}</div>
 
       <div class="legend-inline">
         ${legendItems
@@ -909,25 +930,12 @@ export default function SchedulerPage({ role }) {
     }
   }
 
-  const isCurrentMonth = month === todayMonth && year === todayYear;
-  const isPrevMonth =
-    !isCurrentMonth && year * 100 + month < todayYear * 100 + todayMonth;
-  const isNextMonth =
-    !isCurrentMonth && year * 100 + month > todayYear * 100 + todayMonth;
-
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 px-3 sm:px-6 pt-2 pb-2 bg-slate-100/80 backdrop-blur border-b border-slate-200">
         <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-3 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3">
           {/* MONTH */}
           <div className="flex flex-col items-center w-full sm:flex-1 sm:min-w-[300px] sm:w-auto">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-green-700 font-bold mb-1">
-              {isCurrentMonth
-                ? "Current Month"
-                : isPrevMonth
-                  ? "Previous Month"
-                  : "Next Month"}
-            </div>
             <div className="flex items-center justify-center gap-2 sm:gap-3 h-11 sm:h-12 w-full">
               <button
                 onClick={() => changeMonth(-1)}
@@ -952,7 +960,20 @@ export default function SchedulerPage({ role }) {
 
               <div className="text-center flex-1 sm:flex-none sm:min-w-[200px]">
                 <div className="text-lg sm:text-xl md:text-2xl font-black text-green-800 tracking-tight leading-none">
-                  {months[month - 1]} {year}
+                  {(() => {
+                    const first = days[0];
+                    const last = days[days.length - 1];
+                    if (!first || !last) return `${months[month - 1]} ${year}`;
+                    const firstDate = new Date(first.iso);
+                    const lastDate = new Date(last.iso);
+                    const fm = firstDate.getMonth();
+                    const lm = lastDate.getMonth();
+                    const fy = firstDate.getFullYear();
+                    const ly = lastDate.getFullYear();
+                    if (fm === lm && fy === ly) return `${months[fm]} ${fy}`;
+                    if (fy === ly) return `${months[fm]} – ${months[lm]} ${fy}`;
+                    return `${months[fm]} ${fy} – ${months[lm]} ${ly}`;
+                  })()}
                 </div>
               </div>
 
@@ -993,7 +1014,7 @@ export default function SchedulerPage({ role }) {
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
-                1st · 1–15
+                1st · 27–11
               </button>
               <button
                 onClick={() => setHalf(2)}
@@ -1003,7 +1024,7 @@ export default function SchedulerPage({ role }) {
                     : "text-slate-500 hover:text-slate-700"
                 }`}
               >
-                2nd · 16–{lastDay}
+                2nd · 12–26
               </button>
             </div>
           </div>
@@ -1304,8 +1325,8 @@ export default function SchedulerPage({ role }) {
                     </strong>{" "}
                     (
                     {half === 1
-                      ? "1st Half (1–15)"
-                      : `2nd Half (16–${lastDay})`}
+                      ? "1st Period (27 – 11)"
+                      : "2nd Period (12 – 26)"}
                     ).
                   </p>
                   <p className="text-xs text-rose-600 font-medium mt-2">
