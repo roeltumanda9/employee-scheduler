@@ -105,8 +105,10 @@ export default function EmployeeForm({ open, editing, onDone, onCancel }) {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    setSaving(true);
+  e.preventDefault();
+
+
+  setSaving(true);
 
     const payload = {
       first_name: form.first_name.trim(),

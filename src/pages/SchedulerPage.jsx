@@ -264,6 +264,7 @@ export default function SchedulerPage({ role }) {
   }
 
   function confirmClearHalf() {
+    if (!canEdit || isAllDepts || !editing) return;
     setConfirmClear(false);
 
     const empIds = visibleEmployees.map((e) => e.id);
@@ -293,6 +294,7 @@ export default function SchedulerPage({ role }) {
   }
 
   async function saveEdits() {
+    if (!canEdit || isAllDepts || !editing || saving) return;
     setSaving(true);
 
     const entries = Object.entries(pending);

@@ -62,18 +62,26 @@ export default function EmployeesPage({ role }) {
   }, []);
 
   async function handleDelete(id) {
+    if (!canManage || !id) return;
+
     const { error } = await supabase.from("employees").delete().eq("id", id);
+
     setConfirmId(null);
+
     if (error) alert(error.message);
     else loadEmployees();
   }
 
   function openAdd() {
+    if (!canManage) return;
+
     setEditing(null);
     setFormOpen(true);
   }
 
   function openEdit(emp) {
+    if (!canManage || !emp) return;
+
     setEditing(emp);
     setFormOpen(true);
   }
@@ -121,16 +129,16 @@ export default function EmployeesPage({ role }) {
   return (
     <div className="space-y-4 sm:space-y-6">
       {canManage && (
-        <EmployeeForm
-          open={formOpen}
-          editing={editing}
-          onDone={() => {
-            closeForm();
-            loadEmployees();
-          }}
-          onCancel={closeForm}
-        />
-      )}
+  <EmployeeForm
+    open={formOpen}
+    editing={editing}
+    onDone={() => {
+      closeForm();
+      loadEmployees();
+    }}
+    onCancel={closeForm}
+  />
+)}
 
       <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200">
         {/* Header */}

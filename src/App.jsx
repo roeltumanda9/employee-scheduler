@@ -12,6 +12,8 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
 
@@ -27,38 +29,114 @@ export default function App() {
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getSession().then(async ({ data }) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (!active) return;
-      setSession(data.session);
-      if (data.session) {
-        const p = await getMyProfile();
-        if (active) setProfile(p);
+
+      setSession(nextSession);
+
+      if (!nextSession) {
+        setProfile(null);
+        setProfileLoading(false);
+        setProfileError("");
       }
-      setAuthLoading(false);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_e, s) => {
-      setSession(s);
-      if (s) {
-        const p = await getMyProfile();
-        setProfile(p);
-      } else {
+    async function initializeAuth() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+
+        if (!active) return;
+
+        if (error) {
+          console.error("Failed to restore session:", error);
+          setSession(null);
+          setProfile(null);
+          setProfileError("");
+          return;
+        }
+
+        setSession(data.session ?? null);
+      } catch (error) {
+        if (!active) return;
+
+        console.error("Authentication initialization failed:", error);
+        setSession(null);
         setProfile(null);
+      } finally {
+        if (active) {
+          setAuthLoading(false);
+        }
       }
-    });
+    }
+
+    initializeAuth();
 
     return () => {
       active = false;
-      sub.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
-  // Reset the idle timer whenever a session starts (fresh login)
+  // --- Load the signed-in user's profile ---
+  const sessionUserId = session?.user?.id;
+
   useEffect(() => {
-    if (session) {
-      localStorage.setItem("hmc_last_activity", String(Date.now()));
+    let active = true;
+
+    if (!sessionUserId) {
+      setProfile(null);
+      setProfileLoading(false);
+      setProfileError("");
+      return;
     }
-  }, [session]);
+
+    async function loadProfile() {
+      setProfileLoading(true);
+      setProfileError("");
+      setProfile(null);
+
+      try {
+        const userProfile = await getMyProfile();
+
+        if (!active) return;
+
+        if (!userProfile) {
+          setProfileError(
+            "Your profile could not be loaded. Please sign in again or contact your administrator.",
+          );
+          return;
+        }
+
+        if (userProfile.id !== sessionUserId) {
+          setProfileError(
+            "Your profile does not match the current session. Please sign in again.",
+          );
+          return;
+        }
+
+        setProfile(userProfile);
+      } catch (error) {
+        if (!active) return;
+
+        console.error("Profile loading failed:", error);
+        setProfileError(
+          "An error occurred while loading your profile. Please try again.",
+        );
+      } finally {
+        if (active) {
+          setProfileLoading(false);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      active = false;
+    };
+  }, [sessionUserId]);
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -91,10 +169,45 @@ export default function App() {
   if (!session) return <LoginPage />;
 
   // --- Profile still loading ---
-  if (!profile) {
+  // --- Profile loading ---
+  if (profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-6 h-6 border-2 border-slate-300 border-t-green-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // --- Profile unavailable ---
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-center">
+          <h2 className="text-lg font-bold text-slate-800">
+            Unable to load your profile
+          </h2>
+
+          <p className="mt-2 text-sm text-slate-600">
+            {profileError ||
+              "Your account profile is unavailable. Please sign in again or contact your administrator."}
+          </p>
+
+          <button
+            onClick={async () => {
+              const { error } = await supabase.auth.signOut();
+
+              if (error) {
+                console.error("Sign out failed:", error);
+                setProfileError(
+                  "Unable to sign out. Please refresh the page and try again.",
+                );
+              }
+            }}
+            className="mt-5 w-full rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
     );
   }
