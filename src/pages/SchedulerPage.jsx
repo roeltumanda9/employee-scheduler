@@ -10,6 +10,20 @@ import {
   resolveStatus,
 } from "../lib/statuses";
 
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+
+    return entities[char];
+  });
+}
+
 const DEPT_BANNERS = {
   Amysthetic: "/logo-banner-amystethic.png",
   "H Hotel": "/logo-banner-hhotel.png",
@@ -440,7 +454,7 @@ export default function SchedulerPage({ role }) {
               cls += ` cell-${safe}`;
             }
 
-            return `<td class="${cls}">${st || ""}</td>`;
+            return `<td class="${cls}">${escapeHtml(st || "")}</td>`;
           })
           .join("");
 

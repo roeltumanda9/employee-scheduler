@@ -31,15 +31,17 @@ export default function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!active) return;
 
       setSession(nextSession);
 
-      if (!nextSession) {
+      if (!nextSession || event === "SIGNED_OUT") {
         setProfile(null);
         setProfileLoading(false);
         setProfileError("");
+        setConfirmSignOut(false);
+        setSidebarOpen(false);
       }
     });
 
@@ -439,11 +441,26 @@ export default function App() {
             <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
         }
-        onConfirm={() => {
-          setConfirmSignOut(false);
-          localStorage.removeItem("hmc_last_activity");
-          supabase.auth.signOut();
-        }}
+       
+onConfirm={async () => {
+  setConfirmSignOut(false);
+
+  // Clear protected information immediately.
+  setSession(null);
+  setProfile(null);
+  setProfileError("");
+  setProfileLoading(false);
+  sessionStorage.removeItem("hmc_last_activity");
+
+  const { error } = await supabase.auth.signOut({
+    scope: "local",
+  });
+
+  if (error) {
+    console.error("Sign out failed:", error);
+  }
+}}
+
         onCancel={() => setConfirmSignOut(false)}
       />
     </div>

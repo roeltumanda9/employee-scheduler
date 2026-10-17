@@ -2,20 +2,18 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "./supabase";
 
-// 15 minutes idle → sign out
-const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+// 15 minutes of inactivity before sign-out
+const IDLE_TIMEOUT = 15 * 60 * 1000;
 
-// Warn 2 minutes before
-const WARN_BEFORE = 2 * 60 * 1000;  // Warn 2 minutes before logout
+// Show warning 2 minutes before sign-out
+const WARN_BEFORE = 2 * 60 * 1000;
 
+// sessionStorage is isolated per tab and survives refreshes
 const STORAGE_KEY = "hmc_last_activity";
 
 export function useAutoLogout(enabled) {
-  const [warning, setWarning] = useState(false);  
+  const [warning, setWarning] = useState(false);
   const warningRef = useRef(false);
-
-  // Keep event listeners synchronized with the latest warning state.
-  warningRef.current = warning;
 
   useEffect(() => {
     if (!enabled) {
@@ -28,6 +26,8 @@ export function useAutoLogout(enabled) {
     let logoutStarted = false;
 
     function showWarning() {
+      if (disposed) return;
+
       warningRef.current = true;
       setWarning(true);
     }
@@ -35,51 +35,52 @@ export function useAutoLogout(enabled) {
     function recordActivity() {
       if (disposed || logoutStarted || warningRef.current) return;
 
-      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+      sessionStorage.setItem(STORAGE_KEY, String(Date.now()));
     }
 
     async function signOutForInactivity() {
       if (disposed || logoutStarted) return;
 
       logoutStarted = true;
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
 
       try {
-        const { error } = await supabase.auth.signOut();
+        
+const { error } = await supabase.auth.signOut({
+  scope: "local",
+});
 
-        if (error) {
-          throw error;
-        }
+
+        if (error) throw error;
       } catch (error) {
         if (disposed) return;
 
         console.error("Automatic sign-out failed:", error);
 
-        // Keep the session recoverable if sign-out fails.
-        localStorage.setItem(STORAGE_KEY, String(Date.now()));
+        // Allow the user to recover if sign-out fails.
+        sessionStorage.setItem(STORAGE_KEY, String(Date.now()));
         logoutStarted = false;
         showWarning();
       }
     }
 
-    // Check the previous activity timestamp.
-    const stored = Number(localStorage.getItem(STORAGE_KEY));
+    const stored = Number(sessionStorage.getItem(STORAGE_KEY));
     const now = Date.now();
 
     if (!Number.isFinite(stored) || stored <= 0) {
-  localStorage.setItem(STORAGE_KEY, String(now));
-} else {
-  const elapsed = Math.max(0, now - stored);
+      sessionStorage.setItem(STORAGE_KEY, String(now));
+    } else {
+      const elapsed = Math.max(0, now - stored);
 
-  if (elapsed >= IDLE_TIMEOUT) {
-    void signOutForInactivity();
-  } else if (elapsed >= IDLE_TIMEOUT - WARN_BEFORE) {
-    showWarning();
-  } else {
-    warningRef.current = false;
-    setWarning(false);
-  }
-}
+      if (elapsed >= IDLE_TIMEOUT) {
+        void signOutForInactivity();
+      } else if (elapsed >= IDLE_TIMEOUT - WARN_BEFORE) {
+        showWarning();
+      } else {
+        warningRef.current = false;
+        setWarning(false);
+      }
+    }
 
     const events = [
       "mousemove",
@@ -110,10 +111,9 @@ export function useAutoLogout(enabled) {
     const interval = setInterval(() => {
       if (disposed || logoutStarted) return;
 
-      const last = Number(localStorage.getItem(STORAGE_KEY));
+      const last = Number(sessionStorage.getItem(STORAGE_KEY));
 
       if (!Number.isFinite(last) || last <= 0) {
-        // Do not silently restart the timer if the timestamp disappears.
         void signOutForInactivity();
         return;
       }
@@ -140,7 +140,7 @@ export function useAutoLogout(enabled) {
   }, [enabled]);
 
   function staySignedIn() {
-    localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    sessionStorage.setItem(STORAGE_KEY, String(Date.now()));
     warningRef.current = false;
     setWarning(false);
   }
